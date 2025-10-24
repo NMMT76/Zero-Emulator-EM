@@ -3,7 +3,8 @@ using Speccy;
 using System;
 
 namespace ZeroWin {
-    class InputSystem {
+    class InputSystem
+	{
         public KempstonJoystick kempstonJoystick = null;
         public KempstonMouse kempstonMouse = null;
 
@@ -56,7 +57,7 @@ namespace ZeroWin {
 
         public void EnableMouse() {
             if (kempstonMouse != null) {
-                ziggyWin.zx.RemoveDevice(SPECCY_DEVICE.KEMPSTON_MOUSE);
+                ziggyWin.zx.RemoveDevice(SPECTRUM_DEVICE.KEMPSTON_MOUSE);
             }
             kempstonMouse = new KempstonMouse();
             ziggyWin.zx.AddDevice(kempstonMouse);
@@ -64,7 +65,7 @@ namespace ZeroWin {
         }
 
         public void ReleaseMouse() {
-            ziggyWin.zx.RemoveDevice(SPECCY_DEVICE.KEMPSTON_MOUSE);
+            ziggyWin.zx.RemoveDevice(SPECTRUM_DEVICE.KEMPSTON_MOUSE);
             kempstonMouse = null;
             mouseController.Release();
         }
@@ -86,7 +87,7 @@ namespace ZeroWin {
             }
             else {
                 KempstonJoystick kj = new KempstonJoystick();
-                ziggyWin.zx.RemoveDevice(SPECCY_DEVICE.KEMPSTON_JOYSTICK);
+                ziggyWin.zx.RemoveDevice(SPECTRUM_DEVICE.KEMPSTON_JOYSTICK);
                 kempstonJoystick = null;
             }
 
@@ -105,7 +106,7 @@ namespace ZeroWin {
                 ziggyWin.zx.AddDevice(kempstonJoystick);
             }
             else {
-                ziggyWin.zx.RemoveDevice(SPECCY_DEVICE.KEMPSTON_JOYSTICK);
+                ziggyWin.zx.RemoveDevice(SPECTRUM_DEVICE.KEMPSTON_JOYSTICK);
                 kempstonJoystick = null;
             }
 

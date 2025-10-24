@@ -7,7 +7,7 @@ namespace Speccy {
         public byte MouseY;
         public byte MouseButton;
 
-        public SPECCY_DEVICE DeviceID { get { return SPECCY_DEVICE.KEMPSTON_MOUSE; } }
+        public SPECTRUM_DEVICE DeviceID { get { return SPECTRUM_DEVICE.KEMPSTON_MOUSE; } }
         public bool Responded { get; set; }
 
         public byte In(ushort port) {

@@ -15,7 +15,8 @@ namespace Cpu
     public delegate void TapeEdgeDetectionCallback();
     public delegate void TapeEdgeDecACallback();
     public delegate void TapeEdgeCpACallback();
-    public struct Z80_Registers {
+    public struct Z80_Registers
+	{
         public ushort SP, PC, IX, IY;
         public ushort AF_, BC_, DE_, HL_;
         public ushort MemPtr;
@@ -426,25 +427,9 @@ namespace Cpu
         public TapeEdgeDetectionCallback TapeEdgeDetection;
         public TapeEdgeDecACallback TapeEdgeDecA;
         public TapeEdgeCpACallback TapeEdgeCpA;
-        public Z80() {
+        public Z80()
+		{
             //Build Parity Table
-            /*
-            for (int f = 0; f < 256; f++) {
-                int val = f;
-                bool _parity = false;
-                int runningCounter = 0;
-                for (int count = 0; count < 8; count++) {
-                    if ((val & 0x80) != 0)
-                        runningCounter++;
-                    val = val << 1;
-                }
-
-                if (runningCounter % 2 == 0)
-                    _parity = true;
-
-                parity[f] = _parity;
-            }
-            */
             int i, j, k;
             byte p;
 
@@ -536,7 +521,8 @@ namespace Cpu
             regs.Q = 0;
         }
 
-        public void Interrupt() {
+        public void Interrupt()
+		{
             regs.R++;
             regs.modified_F = false;
             regs.Q = 0;
@@ -545,7 +531,8 @@ namespace Cpu
             iff_1 = false;
             iff_2 = false;
 
-            if (is_halted) {
+            if (is_halted)
+			{
                 is_halted = false;
             }
             
@@ -559,7 +546,8 @@ namespace Cpu
             }
         }
 
-        public void exx() {
+        public void exx()
+		{
             ushort temp;
             temp = regs.HL_;
             regs.HL_ = regs.HL;
@@ -604,7 +592,8 @@ namespace Cpu
             regs.MemPtr = regs.PC;
         }
 
-        public void Trigger_IM_2() {
+        public void Trigger_IM_2()
+		{
             //In reality the I is paired with whatever's on the databus to produce
             //the 16 bit pointer, but 0xff works just fine because that's the speccy's
             //default state when no peripherals are attached (see ref above).
@@ -615,7 +604,8 @@ namespace Cpu
             regs.MemPtr = regs.PC;
         }
 
-        public void NMI() {
+        public void NMI()
+		{
             iff_1 = false;
             is_halted = false;
             PushStack(regs.PC);
@@ -624,60 +614,26 @@ namespace Cpu
             regs.MemPtr = regs.PC;
         }
 
-        public byte Inc(byte reg) {
-            /*
-            SetParity((reg == 0x7f));   //reg = 127? We're gonna overflow on inc!
-            SetNeg(false);               //Negative is always reset (0)
-            SetHalf((((reg & 0x0f) + 1) & BIT_F_HALF) != 0);
-
-            reg = (reg + 1) & 0xff;
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-            return reg;*/
-
+        public byte Inc(byte reg)
+		{
             reg++;
             regs.F = (byte)(( regs.F & BIT_F_CARRY ) | ( (reg == 0x80) ? BIT_F_PARITY : 0 ) | 
                 ((reg & 0x0f) > 0 ? 0 : BIT_F_HALF ));
-            //reg &= 0xff;
             regs.F |= sz53[reg];
             return reg;
         }
 
-        public byte Dec(byte reg) {
-            /*
-            SetNeg(true);                //Negative is always set (1)
-            SetParity((reg == 0x80));   //reg = -128? We're gonna overflow on dec!
-            SetHalf((((reg & 0x0f) - 1) & BIT_F_HALF) != 0);
-
-            reg = (reg - 1) & 0xff;
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-
-            return reg;*/
+        public byte Dec(byte reg)
+		{
              regs.F = (byte)(( regs.F & BIT_F_CARRY ) | ( (reg & 0x0f) > 0 ? 0 : BIT_F_HALF ) | BIT_F_NEG);
              reg--;
              regs.F |= (byte)(((reg) == 0x7f ? BIT_F_PARITY : 0));
-             //reg &= 0xff;
              regs.F |= sz53[reg];
              return reg;
         }
 
         //16 bit addition (no carry)
         public ushort Add_RR(ushort rr1, ushort rr2) {
-            /*
-            SetNeg(false);
-            //SetHalf(((((rr1 >> 8) & 0x0f) + ((rr2 >> 8) & 0x0f)) & BIT_F_HALF) != 0); //Set from high byte of operands
-            SetHalf((((rr1 & 0xfff) + (rr2 & 0xfff)) & 0x1000) != 0); //Set from high byte of operands
-            rr1 += rr2;
-
-            SetCarry((rr1 & 0x10000) != 0);
-            SetF3(((rr1 >> 8) & BIT_F_3) != 0);
-            SetF5(((rr1 >> 8) & BIT_F_5) != 0);
-            return (rr1 & 0xffff);*/
             int add16temp = (rr1) + (rr2);
             byte lookup = (byte)((((rr1) & 0x0800 ) >> 11 ) | ( (  (rr2) & 0x0800 ) >> 10 ) | ( ( add16temp & 0x0800 ) >>  9));
             rr1 = (ushort)add16temp;
@@ -687,21 +643,9 @@ namespace Cpu
         }
 
         //8 bit add to accumulator (no carry)
-        public void Add_R(byte reg) {
-            /*
-            SetNeg(false);
-            SetHalf((((A & 0x0f) + (reg & 0x0f)) & BIT_F_HALF) != 0);
-
-            int ans = (A + reg) & 0xff;
-            SetCarry(((A + reg) & 0x100) != 0);
-            SetParity(((A ^ ~reg) & (A ^ ans) & 0x80) != 0);
-            SetSign((ans & BIT_F_SIGN) != 0);
-            SetZero(ans == 0);
-            SetHalf((((A & 0x0f) + (reg & 0x0f)) & BIT_F_HALF) != 0);
-            SetF3((ans & BIT_F_3) != 0);
-            SetF5((ans & BIT_F_5) != 0);
-            A = ans;
-             * */
+        public void Add_R(byte reg)
+		{
+            
              int addtemp = regs.A + reg;
              byte lookup = (byte)(((regs.A & 0x88 ) >> 3 ) | (((reg) & 0x88 ) >> 2 ) | ( ( addtemp & 0x88 ) >> 1 ));
              regs.A= (byte)(addtemp & 0xff);
@@ -710,21 +654,8 @@ namespace Cpu
         }
 
         //Add with carry into accumulator
-        public void Adc_R(byte reg) {
-            /*
-            SetNeg(false);
-            int fc = ((F & BIT_F_CARRY) != 0 ? 1 : 0);
-            SetHalf((((A & 0x0f) + (reg & 0x0f) + fc) & BIT_F_HALF) != 0);
-            int ans = (A + reg + fc) & 0xff;
-
-            SetCarry(((A + reg + fc) & 0x100) != 0);
-
-            SetParity(((A ^ ~reg) & (A ^ ans) & 0x80) != 0);
-            SetSign((ans & BIT_F_SIGN) != 0);
-            SetZero(ans == 0);
-            SetF3((ans & BIT_F_3) != 0);
-            SetF5((ans & BIT_F_5) != 0);
-            A = ans;*/
+        public void Adc_R(byte reg)
+		{
             int adctemp = regs.A + (reg) + ( regs.F & BIT_F_CARRY ); 
             byte lookup = (byte)(((regs.A & 0x88) >> 3) | (((reg) & 0x88)>>2) | ((adctemp & 0x88)>> 1)); 
             regs.A= (byte)(adctemp & 0xff);
@@ -733,20 +664,8 @@ namespace Cpu
         }
 
         //Add with carry into regs.HL
-        public void Adc_RR(ushort reg) {
-            /*
-            SetNeg(false);
-            int fc = ((F & BIT_F_CARRY) != 0 ? 1 : 0);
-            int ans = (regs.HL + reg + fc) & 0xffff;
-            SetCarry(((regs.HL + reg + fc) & 0x10000) != 0);
-            SetHalf((((regs.HL & 0xfff) + (reg & 0xfff) + fc) & 0x1000) != 0); //Set from high byte of operands
-            //SetHalf(((((regs.HL >> 8) & 0x0f + (reg >> 8) & 0x0f) + fc) & BIT_F_HALF) != 0); //Set from high byte of operands
-            SetParity(((regs.HL ^ ~reg) & (regs.HL ^ ans) & 0x8000) != 0);
-            SetSign((ans & (BIT_F_SIGN << 8)) != 0);
-            SetZero(ans == 0);
-            SetF3(((ans >> 8) & BIT_F_3) != 0);
-            SetF5(((ans >> 8) & BIT_F_5) != 0);
-            regs.HL = ans;*/
+        public void Adc_RR(ushort reg)
+		{
             int add16temp = regs.HL + (reg) + ( regs.F & BIT_F_CARRY );
             byte lookup = (byte)(((regs.HL & 0x8800 ) >> 11 ) | (((reg) & 0x8800 ) >> 10 ) | ( ( add16temp & 0x8800 ) >>  9 ));
             regs.HL = (ushort)(add16temp);
@@ -756,21 +675,8 @@ namespace Cpu
         }
 
         //8 bit subtract to accumulator (no carry)
-        public void Sub_R(byte reg) {
-            /*
-            SetNeg(true);
-
-            int ans = (A - reg) & 0xff;
-            SetCarry(((A - reg) & 0x100) != 0);
-            SetF3((ans & BIT_F_3) != 0);
-            SetF5((ans & BIT_F_5) != 0);
-            SetParity(((A ^ reg) & (A ^ ans) & 0x80) != 0);
-            SetSign((ans & BIT_F_SIGN) != 0);
-            SetHalf((((A & 0x0f) - (reg & 0x0f)) & BIT_F_HALF) != 0);
-            SetZero(ans == 0);
-            SetNeg(true);
-
-            A = ans;*/
+        public void Sub_R(byte reg) 
+		{
             int subtemp = regs.A - (reg);
             byte lookup = (byte)(((regs.A & 0x88 ) >> 3 ) | ( (reg & 0x88 ) >> 2 ) | ((subtemp & 0x88 ) >> 1 )); 
             regs.A= (byte)subtemp;
@@ -779,19 +685,8 @@ namespace Cpu
         }
 
         //8 bit subtract from accumulator with carry (SBC A, r)
-        public void Sbc_R(byte reg) {
-           /* SetNeg(true);
-            int fc = ((F & BIT_F_CARRY) != 0 ? 1 : 0);
-
-            int ans = (A - reg - fc) & 0xff;
-            SetCarry(((A - reg - fc) & 0x100) != 0);
-            SetParity(((A ^ reg) & (A ^ ans) & 0x80) != 0);
-            SetSign((ans & BIT_F_SIGN) != 0);
-            SetHalf((((A & 0x0f) - (reg & 0x0f) - fc) & BIT_F_HALF) != 0);
-            SetZero(ans == 0);
-            SetF3((ans & BIT_F_3) != 0);
-            SetF5((ans & BIT_F_5) != 0);
-            A = ans;*/
+        public void Sbc_R(byte reg)
+		{  
             int sbctemp = regs.A - (reg) - ( regs.F & BIT_F_CARRY );
             byte lookup = (byte)(((regs.A & 0x88 ) >> 3 ) |( ( (reg) & 0x88 ) >> 2 ) |( ( sbctemp & 0x88 ) >> 1 ));
             regs.A= (byte)sbctemp;
@@ -800,23 +695,8 @@ namespace Cpu
         }
 
         //16 bit subtract from regs.HL with carry
-        public void Sbc_RR(ushort reg) {
-            /*
-            SetNeg(true);
-            int fc = ((F & BIT_F_CARRY) != 0 ? 1 : 0);
-
-            SetHalf((((regs.HL & 0xfff) - (reg & 0xfff) - fc) & 0x1000) != 0); //Set from high byte of operands
-            // SetHalf((((((regs.HL >> 8) & 0x0f) - ((reg >> 8) & 0x0f)) - fc) & BIT_F_HALF) != 0); //Set from high byte of operands
-
-            int ans = (regs.HL - reg - fc) & 0xffff;
-            SetCarry(((regs.HL - reg - fc) & 0x10000) != 0);
-            SetParity(((regs.HL ^ reg) & (regs.HL ^ ans) & 0x8000) != 0);
-            SetSign((ans & (BIT_F_SIGN << 8)) != 0);
-            SetZero(ans == 0);
-            SetF3(((ans >> 8) & BIT_F_3) != 0);
-            SetF5(((ans >> 8) & BIT_F_5) != 0);
-
-            regs.HL = ans;*/
+        public void Sbc_RR(ushort reg)
+		{
             int sub16temp = regs.HL - (reg) - (regs.F & BIT_F_CARRY);
             byte lookup = (byte)(((regs.HL & 0x8800 ) >> 11 ) | ( ((reg) & 0x8800 ) >> 10 ) | (( sub16temp & 0x8800 ) >>  9 ));
             regs.HL = (ushort)sub16temp;
@@ -825,19 +705,8 @@ namespace Cpu
         }
 
         //Comparison with accumulator
-        public void Cp_R(byte reg) {
-            /*
-            SetNeg(true);
-
-            int result = A - reg;
-            int ans = result & 0xff;
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            SetHalf((((A & 0x0f) - (reg & 0x0f)) & BIT_F_HALF) != 0);
-            SetParity(((A ^ reg) & (A ^ ans) & 0x80) != 0);
-            SetSign((ans & BIT_F_SIGN) != 0);
-            SetZero(ans == 0);
-            SetCarry((result & 0x100) != 0);*/
+        public void Cp_R(byte reg)
+		{
             int cptemp = regs.A - reg;
             byte lookup = (byte)(((regs.A & 0x88 ) >> 3 ) | ( ( (reg) & 0x88 ) >> 2 ) | ( (cptemp & 0x88 ) >> 1 ));
             regs.F = (byte)(((cptemp & 0x100) > 0 ? BIT_F_CARRY : ( cptemp > 0 ? 0 : BIT_F_ZERO ) ) | BIT_F_NEG |
@@ -845,20 +714,8 @@ namespace Cpu
         }
 
         //AND with accumulator
-        public void And_R(byte reg) {
-            /*
-            SetCarry(false);
-            SetNeg(false);
-
-            int ans = A & reg;
-            SetSign((ans & BIT_F_SIGN) != 0);
-            SetHalf(true);
-            SetZero(ans == 0);
-            //SetParity(GetParity(ans));
-            SetParity(parity[ans]);
-            SetF3((ans & BIT_F_3) != 0);
-            SetF5((ans & BIT_F_5) != 0);
-            A = ans;*/
+        public void And_R(byte reg)
+		{
             regs.A &= reg;
             regs.F = (byte)(BIT_F_HALF | sz53p[regs.A]);
             
@@ -868,89 +725,30 @@ namespace Cpu
         }
 
         //XOR with accumulator
-        public void Xor_R(byte reg) {
-            /*
-            SetCarry(false);
-            SetNeg(false);
-
-            int ans = (A ^ reg) & 0xff;
-            SetSign((ans & BIT_F_SIGN) != 0);
-            SetHalf(false);
-            SetZero(ans == 0);
-            // SetParity(GetParity(ans));
-            SetParity(parity[ans]);
-            SetF3((ans & BIT_F_3) != 0);
-            SetF5((ans & BIT_F_5) != 0);
-            A = ans;*/
+        public void Xor_R(byte reg)
+		{
             regs.A = (byte)( regs.A ^ reg);
             regs.F = sz53p[regs.A];
         }
 
         //OR with accumulator
-        public void Or_R(byte reg) {
-            /*
-            SetCarry(false);
-            SetNeg(false);
-
-            int ans = A | reg;
-            SetSign((ans & BIT_F_SIGN) != 0);
-            SetHalf(false);
-            SetZero(ans == 0);
-            //SetParity(GetParity(ans));
-            SetParity(parity[ans]);
-            SetF3((ans & BIT_F_3) != 0);
-            SetF5((ans & BIT_F_5) != 0);
-            A = ans;*/
+        public void Or_R(byte reg)
+		{
             regs.A |= reg;
             regs.F = sz53p[regs.A];
         }
 
         //Rotate left with carry register (RLC r)
-        public byte Rlc_R(byte reg) {
-            /*
-            int msb = reg & BIT_F_SIGN;
-
-            if (msb != 0) {
-                reg = ((reg << 1) | 0x01) & 0xff;
-            } else
-                reg = (reg << 1) & 0xff;
-
-            SetCarry(msb != 0);
-            SetHalf(false);
-            SetNeg(false);
-            //SetParity(GetParity(reg));
-            SetParity(parity[reg]);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            return reg;*/
+        public byte Rlc_R(byte reg)
+		{
             reg = (byte)((reg << 1 ) | (reg >>7 ));
             regs.F = (byte)((reg & BIT_F_CARRY) | sz53p[reg]);
             return reg;
         }
 
         //Rotate right with carry register (RLC r)
-        public byte Rrc_R(byte reg) {
-            /*
-            int lsb = reg & BIT_F_CARRY; //save the lsb bit
-
-            if (lsb != 0) {
-                reg = (reg >> 1) | 0x80;
-            } else
-                reg = reg >> 1;
-
-            SetCarry(lsb != 0);
-            SetHalf(false);
-            SetNeg(false);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            //SetParity(GetParity(reg));
-            SetParity(parity[reg]);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-
-            return reg;*/
+        public byte Rrc_R(byte reg)
+		{
             regs.F = (byte)(reg & BIT_F_CARRY);
             reg = (byte)((reg >>1 ) | (reg << 7));
             regs.F |= sz53p[reg];
@@ -958,27 +756,8 @@ namespace Cpu
         }
 
         //Rotate left register (RL r)
-        public byte Rl_R(byte reg) {
-            /*
-            bool rc = (reg & BIT_F_SIGN) != 0;
-            int msb = F & BIT_F_CARRY; //save the msb bit
-
-            if (msb != 0) {
-                reg = ((reg << 1) | 0x01) & 0xff;
-            } else {
-                reg = (reg << 1) & 0xff;
-            }
-
-            SetCarry(rc);
-            SetHalf(false);
-            SetNeg(false);
-            //SetParity(GetParity(reg));
-            SetParity(parity[reg]);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            return reg;*/
+        public byte Rl_R(byte reg)
+		{
             byte rltemp = reg;
             reg = (byte)((reg << 1) | (regs.F & BIT_F_CARRY));
             regs.F = (byte)(( rltemp >> 7 ) | sz53p[reg]);
@@ -986,26 +765,8 @@ namespace Cpu
         }
 
         //Rotate right register (RL r)
-        public byte Rr_R(byte reg) {
-            /*
-            bool rc = (reg & BIT_F_CARRY) != 0;
-            int lsb = F & BIT_F_CARRY; //save the lsb bit
-
-            if (lsb != 0) {
-                reg = (reg >> 1) | 0x80;
-            } else
-                reg = reg >> 1;
-
-            SetCarry(rc);
-            SetHalf(false);
-            SetNeg(false);
-            // SetParity(GetParity(reg));
-            SetParity(parity[reg]);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            return reg;*/
+        public byte Rr_R(byte reg)
+		{
             byte rrtemp = reg;
             reg = (byte)((reg >> 1 ) | ( regs.F << 7 ));
             regs.F = (byte)(( rrtemp & BIT_F_CARRY ) | sz53p[reg]);
@@ -1013,22 +774,8 @@ namespace Cpu
         }
 
         //Shift left arithmetic register (SLA r)
-        public byte Sla_R(byte reg) {
-            /*
-            int msb = reg & BIT_F_SIGN; //save the msb bit
-
-            reg = (reg << 1) & 0xff;
-
-            SetCarry(msb != 0);
-            SetHalf(false);
-            SetNeg(false);
-            //SetParity(GetParity(reg));
-            SetParity(parity[reg]);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            return reg;*/
+        public byte Sla_R(byte reg)
+		{
             regs.F = (byte)(reg >> 7);
             reg = (byte)(reg <<  1);
             regs.F |= sz53p[reg];
@@ -1036,21 +783,8 @@ namespace Cpu
         }
 
         //Shift right arithmetic register (SRA r)
-        public byte Sra_R(byte reg) {
-            /*
-            int lsb = reg & BIT_F_CARRY; //save the lsb bit
-            reg = (reg >> 1) | (reg & BIT_F_SIGN);
-
-            SetCarry(lsb != 0);
-            SetHalf(false);
-            SetNeg(false);
-            // SetParity(GetParity(reg));
-            SetParity(parity[reg]);
-            SetZero(reg == 0);
-            SetSign((reg & 0x80) != 0);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            return reg;*/
+        public byte Sra_R(byte reg)
+		{
             regs.F = (byte)(reg & BIT_F_CARRY);
             reg = (byte)((reg & 0x80 ) | (reg >> 1 ));
             regs.F |= sz53p[reg];
@@ -1058,22 +792,8 @@ namespace Cpu
         }
 
         //Shift left logical register (SLL r)
-        public byte Sll_R(byte reg) {
-            /*
-            int msb = reg & BIT_F_SIGN; //save the msb bit
-            reg = reg << 1;
-            reg = (reg | 0x01) & 0xff;
-
-            SetCarry(msb != 0);
-            SetHalf(false);
-            SetNeg(false);
-            // SetParity(GetParity(reg));
-            SetParity(parity[reg]);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            return reg;*/
+        public byte Sll_R(byte reg)
+		{
             regs.F = (byte)(reg >> 7);
             reg = (byte)(( reg << 1 ) | 0x01);
             regs.F |= sz53p[reg];
@@ -1081,21 +801,8 @@ namespace Cpu
         }
 
         //Shift right logical register (SRL r)
-        public byte Srl_R(byte reg) {
-            /*
-            int lsb = reg & BIT_F_CARRY; //save the lsb bit
-            reg = reg >> 1;
-
-            SetCarry(lsb != 0);
-            SetHalf(false);
-            SetNeg(false);
-            //SetParity(GetParity(reg));
-            SetParity(parity[reg]);
-            SetZero(reg == 0);
-            SetSign((reg & BIT_F_SIGN) != 0);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);
-            return reg;*/
+        public byte Srl_R(byte reg)
+		{
             regs.F = (byte)(reg & BIT_F_CARRY);
             reg = (byte)(reg >> 1);
             regs.F |= sz53p[reg];
@@ -1103,41 +810,37 @@ namespace Cpu
         }
 
         //Bit test operation (BIT b, r)
-        public void Bit_R(int b, byte val) {
-            /*
-            bool bitset = ((reg & (1 << b)) != 0);  //true if bit is set
-            SetZero(!bitset);                       //true if bit is not set, false if bit is set
-            SetParity(!bitset);                     //copy of Z
-            SetNeg(false);
-            SetHalf(true);
-            SetSign((b == 7) ? bitset : false);
-            SetF3((reg & BIT_F_3) != 0);
-            SetF5((reg & BIT_F_5) != 0);*/
+        public void Bit_R(int b, byte val)
+		{
             regs.F = (byte)(( regs.F & BIT_F_CARRY ) | BIT_F_HALF | ( val & ( BIT_F_3 | BIT_F_5 ) ));
             if( !((val & ( 0x01 << (b))) > 0)) regs.F |= BIT_F_PARITY | BIT_F_ZERO;
             if( (b == 7) && ((val & 0x80) > 0)) regs.F |= BIT_F_SIGN; 
         }
 
-        public void Bit_MemPtr(int b, byte val) {
+        public void Bit_MemPtr(int b, byte val)
+		{
             regs.F = (byte)((regs.F & BIT_F_CARRY) | BIT_F_HALF | ((regs.MemPtr >> 8) & (BIT_F_3 | BIT_F_5)));
             if (!((val & (0x01 << (b))) > 0)) regs.F |= BIT_F_PARITY | BIT_F_ZERO;
             if ((b == 7) && ((val & 0x80) > 0)) regs.F |= BIT_F_SIGN;
         }
 
         //Reset bit operation (RES b, r)
-        public byte Res_R(int b, byte reg) {
+        public byte Res_R(int b, byte reg)
+		{
             reg = (byte)(reg & ~(1 << b));
             return reg;
         }
 
         //Set bit operation (SET b, r)
-        public byte Set_R(int b, byte reg) {
+        public byte Set_R(int b, byte reg)
+		{
             reg = (byte)(reg | (1 << b));
             return reg;
         }
 
         //Decimal Adjust Accumulator (DAA)
-        public void DAA() {
+        public void DAA()
+		{
             byte ans = regs.A;
             byte incr = 0;
             bool carry = (regs.F & BIT_F_CARRY) != 0;
@@ -1168,7 +871,8 @@ namespace Cpu
 
         //Returns parity of a number (true if there are even numbers of 1, false otherwise)
         //Superseded by the table method.
-        public bool GetParity(byte val) {
+        public bool GetParity(byte val)
+		{
             bool parity = false;
             int runningCounter = 0;
             for (int count = 0; count < 8; count++) {
@@ -1188,36 +892,25 @@ namespace Cpu
             return res;
         }
 
-        public byte In_BC(){
+        public byte In_BC()
+		{
             byte result = In(regs.BC);
-            /*
-            SetNeg(false);
-            SetParity(parity[result]);
-            SetSign((result & F_SIGN) != 0);
-            SetZero(result == 0);
-            SetHalf(false);
-            SetF3((result & F_3) != 0);
-            SetF5((result & F_5) != 0);
-
-            return result;*/
             regs.F = (byte)((regs.F & BIT_F_CARRY) | sz53p[result]);
             return result;
         }
 
         //The stack is pushed in low byte, high byte form
-        public void PushStack(ushort val) {
+        public void PushStack(ushort val)
+		{
             regs.SP -= 2;
             PokeByte((ushort)(regs.SP + 1), (byte)(val >> 8));
             PokeByte(regs.SP, (byte)(val & 0xff));
-            //if (PushStackEvent != null)
-            //    OnPushStackEvent(regs.SP, val);
         }
 
-        public ushort PopStack() {
+        public ushort PopStack()
+		{
             ushort val = (ushort)((PeekByte(regs.SP)) | (PeekByte((ushort)(regs.SP + 1)) << 8));
             regs.SP += 2;
-            //if (PopStackEvent != null)
-            //    OnPopStackEvent(val);
             return val;
         }
 
@@ -1232,14 +925,12 @@ namespace Cpu
         public void Execute(int opcode) {
             if (is_halted)
                 return;
-            //disp = 0;
             //Massive switch-case to decode the instructions!
             switch(opcode) {
 
                 #region NOP
 
                 case 0x00: //NOP
-                           // Log("NOP");
                 break;
 
                 #endregion NOP
@@ -3002,31 +2693,28 @@ namespace Cpu
                 #region IN A, (n)
                 case 0xDB:  //IN A, (n)
 
-                disp = PeekByte(regs.PC);
-                ushort port = (ushort)((regs.A << 8) | disp);
+					disp = PeekByte(regs.PC);
+					ushort port = (ushort)((regs.A << 8) | disp);
 
-                //Tape Trap
-                if (((disp & 0x1) == 0) && and_32_Or_64)
-                    TapeEdgeDetection?.Invoke();
+					//Tape Trap
+					if (((disp & 0x1) == 0) && and_32_Or_64)
+						TapeEdgeDetection?.Invoke();
 
-                // Log(String.Format("IN A, ({0:X})", disp));
-                regs.MemPtr = (ushort)((regs.A << 8) + disp + 1);
-                regs.A = In(port);
+					regs.MemPtr = (ushort)((regs.A << 8) + disp + 1);
+					regs.A = In(port);
 
-
-                and_32_Or_64 = false;
-                regs.PC++;
-                break;
+					and_32_Or_64 = false;
+					regs.PC++;
+					break;
                 #endregion
 
                 #region OUT (n), A
                 case 0xD3:  //OUT (n), A
-                disp = PeekByte(regs.PC);
-                // Log(String.Format("OUT ({0:X}), A", disp));
-                Out((ushort)(disp | (regs.A << 8)), regs.A);
-                regs.MemPtr = (ushort)(((disp + 1) & 0xff) | (regs.A << 8));
-                regs.PC++;
-                break;
+					disp = PeekByte(regs.PC);
+					Out((ushort)(disp | (regs.A << 8)), regs.A);
+					regs.MemPtr = (ushort)(((disp + 1) & 0xff) | (regs.A << 8));
+					regs.PC++;
+					break;
                 #endregion
 
                 #region Decimal Adjust Accumulator (DAA)
@@ -7346,42 +7034,36 @@ namespace Cpu
                 switch(opcode = FetchInstruction()) {
                     #region Addition instructions
                     case 0x09:  //ADD regs.IY, regs.BC
-                                // Log("ADD regs.IY, regs.BC");
-                    Contend(regs.IR, 1, 7);
-                    regs.MemPtr = (ushort)(regs.IY + 1);
-                    regs.IY = Add_RR(regs.IY, regs.BC);
-                    break;
+						Contend(regs.IR, 1, 7);
+						regs.MemPtr = (ushort)(regs.IY + 1);
+						regs.IY = Add_RR(regs.IY, regs.BC);
+						break;
 
                     case 0x19:  //ADD regs.IY, regs.DE
-                                // Log("ADD regs.IY, regs.DE");
-                    Contend(regs.IR, 1, 7);
-                    regs.MemPtr = (ushort)(regs.IY + 1);
-                    regs.IY = Add_RR(regs.IY, regs.DE);
-                    break;
+						Contend(regs.IR, 1, 7);
+						regs.MemPtr = (ushort)(regs.IY + 1);
+						regs.IY = Add_RR(regs.IY, regs.DE);
+						break;
 
                     case 0x29:  //ADD regs.IY, regs.IY
-                                // Log("ADD regs.IY, regs.IY");
-                    Contend(regs.IR, 1, 7);
-                    regs.MemPtr = (ushort)(regs.IY + 1);
-                    regs.IY = Add_RR(regs.IY, regs.IY);
-                    break;
+						Contend(regs.IR, 1, 7);
+						regs.MemPtr = (ushort)(regs.IY + 1);
+						regs.IY = Add_RR(regs.IY, regs.IY);
+						break;
 
                     case 0x39:  //ADD regs.IY, regs.SP
-                                // Log("ADD regs.IY, regs.SP");
-                    Contend(regs.IR, 1, 7);
-                    regs.MemPtr = (ushort)(regs.IY + 1);
-                    regs.IY = Add_RR(regs.IY, regs.SP);
-                    break;
+						Contend(regs.IR, 1, 7);
+						regs.MemPtr = (ushort)(regs.IY + 1);
+						regs.IY = Add_RR(regs.IY, regs.SP);
+						break;
 
                     case 0x84:  //ADD A, IYH
-                                // Log("ADD A, IYH");
-                    Add_R(regs.IYH);
-                    break;
+						Add_R(regs.IYH);
+						break;
 
                     case 0x85:  //ADD A, IYL
-                                // Log("ADD A, IYL");
-                    Add_R(regs.IYL);
-                    break;
+						Add_R(regs.IYL);
+						break;
 
                     case 0x86:  //Add A, (regs.IY+d)
                     {
@@ -7395,14 +7077,12 @@ namespace Cpu
                         break;
                     }
                     case 0x8C:  //ADC A, IYH
-                                // Log("ADC A, IYH");
-                    Adc_R(regs.IYH);
-                    break;
+						Adc_R(regs.IYH);
+						break;
 
                     case 0x8D:  //ADC A, IYL
-                                // Log("ADC A, IYL");
-                    Adc_R(regs.IYL);
-                    break;
+						Adc_R(regs.IYL);
+						break;
 
                     case 0x8E: //ADC A, (regs.IY+d)
                     {

@@ -204,39 +204,6 @@
   <data name="saveBinaryToolStripMenuItem.Text" xml:space="preserve">
     <value>Save Binary...</value>
   </data>
-  <data name="toolStripSeparator12.Size" type="System.Drawing.Size, System.Drawing">
-    <value>237, 6</value>
-  </data>
-  <data name="insertDiskAToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
-  </data>
-  <data name="insertDiskAToolStripMenuItem.Text" xml:space="preserve">
-    <value>A: -- Empty --</value>
-  </data>
-  <data name="insertDiskBToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
-  </data>
-  <data name="insertDiskBToolStripMenuItem.Text" xml:space="preserve">
-    <value>B: -- Empty --</value>
-  </data>
-  <data name="insertDiskCToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
-  </data>
-  <data name="insertDiskCToolStripMenuItem.Text" xml:space="preserve">
-    <value>C: -- Empty --</value>
-  </data>
-  <data name="insertDiskDToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>148, 22</value>
-  </data>
-  <data name="insertDiskDToolStripMenuItem.Text" xml:space="preserve">
-    <value>D: -- Empty --</value>
-  </data>
-  <data name="disksMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>240, 22</value>
-  </data>
-  <data name="disksMenuItem.Text" xml:space="preserve">
-    <value>Disks</value>
-  </data>
   <data name="toolStripSeparator18.Size" type="System.Drawing.Size, System.Drawing">
     <value>237, 6</value>
   </data>
@@ -259,7 +226,7 @@
     <value>Ctrl+F5</value>
   </data>
   <data name="resetToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="resetToolStripMenuItem.Text" xml:space="preserve">
     <value>Reset</value>
@@ -268,13 +235,13 @@
     <value>F5</value>
   </data>
   <data name="toolStripMenuItem6.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="toolStripMenuItem6.Text" xml:space="preserve">
     <value>Pause</value>
   </data>
   <data name="toolStripSeparator5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>173, 6</value>
+    <value>177, 6</value>
   </data>
   <data name="emulationSpeed1.Size" type="System.Drawing.Size, System.Drawing">
     <value>92, 22</value>
@@ -307,7 +274,7 @@
     <value>10x</value>
   </data>
   <data name="emulationSpeedMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="emulationSpeedMenuItem.Text" xml:space="preserve">
     <value>Emulation Speed</value>
@@ -343,43 +310,19 @@
     <value>50 MHz</value>
   </data>
   <data name="cpuSpeedMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="cpuSpeedMenuItem.Text" xml:space="preserve">
     <value>CPU Speed</value>
   </data>
   <data name="toolStripSeparator13.Size" type="System.Drawing.Size, System.Drawing">
-    <value>173, 6</value>
+    <value>177, 6</value>
   </data>
   <data name="zxSpectrum48kToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="zxSpectrum48kToolStripMenuItem.Text" xml:space="preserve">
     <value>ZX Spectrum 48K</value>
-  </data>
-  <data name="zxSpectrum128kToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
-  </data>
-  <data name="zxSpectrum128kToolStripMenuItem1.Text" xml:space="preserve">
-    <value>ZX Spectrum 128K</value>
-  </data>
-  <data name="zxSpectrum128keToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
-  </data>
-  <data name="zxSpectrum128keToolStripMenuItem1.Text" xml:space="preserve">
-    <value>ZX Spectrum 128KE</value>
-  </data>
-  <data name="zxSpectrum3ToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
-  </data>
-  <data name="zxSpectrum3ToolStripMenuItem1.Text" xml:space="preserve">
-    <value>ZX Spectrum +3</value>
-  </data>
-  <data name="pentagon128kToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>176, 22</value>
-  </data>
-  <data name="pentagon128kToolStripMenuItem1.Text" xml:space="preserve">
-    <value>Pentagon 128K</value>
   </data>
   <data name="machineToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>65, 20</value>
@@ -415,7 +358,7 @@
     <value>Reduce Pixellation</value>
   </data>
   <data name="renderingToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>141, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="renderingToolStripMenuItem.Text" xml:space="preserve">
     <value>Rendering</value>
@@ -439,7 +382,7 @@
     <value>Normal</value>
   </data>
   <data name="paletteToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>141, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="paletteToolStripMenuItem1.Text" xml:space="preserve">
     <value>Palette</value>
@@ -487,7 +430,7 @@
     <value>Toggle Full Screen        </value>
   </data>
   <data name="windowSizeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>141, 22</value>
+    <value>180, 22</value>
   </data>
   <data name="windowSizeToolStripMenuItem.Text" xml:space="preserve">
     <value>Window Size</value>
@@ -729,6 +672,18 @@ if your keyboard doesn't have the INS key.</value>
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
     <value>2</value>
+  </data>
+  <data name="insertDiskAToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>32, 19</value>
+  </data>
+  <data name="insertDiskBToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>32, 19</value>
+  </data>
+  <data name="insertDiskCToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>32, 19</value>
+  </data>
+  <data name="insertDiskDToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>32, 19</value>
   </data>
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>287, 56</value>
@@ -2466,7 +2421,7 @@ Kempston mouse status</value>
     <value>CenterScreen</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
-    <value>Zero</value>
+    <value>Zero EM</value>
   </data>
   <data name="&gt;&gt;openFileDialog1.Name" xml:space="preserve">
     <value>openFileDialog1</value>
@@ -2532,42 +2487,6 @@ Kempston mouse status</value>
     <value>saveBinaryToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;saveBinaryToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator12.Name" xml:space="preserve">
-    <value>toolStripSeparator12</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator12.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;disksMenuItem.Name" xml:space="preserve">
-    <value>disksMenuItem</value>
-  </data>
-  <data name="&gt;&gt;disksMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;insertDiskAToolStripMenuItem.Name" xml:space="preserve">
-    <value>insertDiskAToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;insertDiskAToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;insertDiskBToolStripMenuItem.Name" xml:space="preserve">
-    <value>insertDiskBToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;insertDiskBToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;insertDiskCToolStripMenuItem.Name" xml:space="preserve">
-    <value>insertDiskCToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;insertDiskCToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;insertDiskDToolStripMenuItem.Name" xml:space="preserve">
-    <value>insertDiskDToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;insertDiskDToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator18.Name" xml:space="preserve">
@@ -2688,30 +2607,6 @@ Kempston mouse status</value>
     <value>zxSpectrum48kToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;zxSpectrum48kToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;zxSpectrum128kToolStripMenuItem1.Name" xml:space="preserve">
-    <value>zxSpectrum128kToolStripMenuItem1</value>
-  </data>
-  <data name="&gt;&gt;zxSpectrum128kToolStripMenuItem1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;zxSpectrum128keToolStripMenuItem1.Name" xml:space="preserve">
-    <value>zxSpectrum128keToolStripMenuItem1</value>
-  </data>
-  <data name="&gt;&gt;zxSpectrum128keToolStripMenuItem1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;zxSpectrum3ToolStripMenuItem1.Name" xml:space="preserve">
-    <value>zxSpectrum3ToolStripMenuItem1</value>
-  </data>
-  <data name="&gt;&gt;zxSpectrum3ToolStripMenuItem1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;pentagon128kToolStripMenuItem1.Name" xml:space="preserve">
-    <value>pentagon128kToolStripMenuItem1</value>
-  </data>
-  <data name="&gt;&gt;pentagon128kToolStripMenuItem1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;viewToolStripMenuItem.Name" xml:space="preserve">
@@ -2946,6 +2841,30 @@ Kempston mouse status</value>
     <value>preferencesToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;preferencesToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;insertDiskAToolStripMenuItem.Name" xml:space="preserve">
+    <value>insertDiskAToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;insertDiskAToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;insertDiskBToolStripMenuItem.Name" xml:space="preserve">
+    <value>insertDiskBToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;insertDiskBToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;insertDiskCToolStripMenuItem.Name" xml:space="preserve">
+    <value>insertDiskCToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;insertDiskCToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;insertDiskDToolStripMenuItem.Name" xml:space="preserve">
+    <value>insertDiskDToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;insertDiskDToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripButton1.Name" xml:space="preserve">

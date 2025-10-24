@@ -1,5 +1,5 @@
 ﻿namespace Speccy {
-    public interface IODevice: SpeccyDevice {
+    public interface IODevice: ISpectrumDevice {
 
         bool Responded { get; }
         byte In(ushort port);

@@ -60,7 +60,7 @@ namespace Speccy
         protected int timeToOutSound = 0;
         private byte lastOut = 0xff;
 
-        public SPECCY_DEVICE DeviceID { get { return SPECCY_DEVICE.AY_3_8912; } }
+        public SPECTRUM_DEVICE DeviceID { get { return SPECTRUM_DEVICE.AY_3_8912; } }
         public bool Responded { get; set; }
         public bool StereoSound
         {

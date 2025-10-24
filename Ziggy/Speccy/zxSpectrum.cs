@@ -1,11 +1,12 @@
 ﻿
 #define NEW_RZX_METHODS
 
-using System;
-using Peripherals;
 using Cpu;
+using Peripherals;
 using SpeccyCommon;
+using System;
 using System.Collections.Generic;
+using EdgeMaster.Core;
 
 namespace Speccy
 {
@@ -89,41 +90,49 @@ namespace Speccy
 
         public Z80 cpu;
         public ULA_Plus ula_plus = new ULA_Plus();
-        //public Z80_Registers regs;
-        public ZeroSound.SoundManager beeper;
+		public ULA_SX ula_sx;
+		//public Z80_Registers regs;
+		public ZeroSound.SoundManager beeper;
         public List<IODevice> io_devices = new List<IODevice>();
         public List<AudioDevice> audio_devices = new List<AudioDevice>();
-        public Dictionary<int, SpeccyDevice> attached_devices = new Dictionary<int, SpeccyDevice>();
+        public Dictionary<int, ISpectrumDevice> attached_devices = new Dictionary<int, ISpectrumDevice>();
         protected Random rnd_generator = new Random();
 
         protected int[] keyLine = { 255, 255, 255, 255, 255, 255, 255, 255 };
 
         public int[] AttrColors = new int[16];
 
-        /// <summary>
-        /// The regular speccy palette
-        /// </summary>
-        public int[] NormalColors = {
-                                             0x000000,            // Blacks
-                                             0x0000C0,            // Red
-                                             0xC00000,            // Blue
-                                             0xC000C0,            // Magenta
-                                             0x00C000,            // Green
-                                             0x00C0C0,            // Yellow
-                                             0xC0C000,            // Cyan
-                                             0xC0C0C0,            // White
-                                             0x000000,            // Bright Black
-                                             0x0000F0,            // Bright Red
-                                             0xF00000,            // Bright Blue
-                                             0xF000F0,            // Bright Magenta
-                                             0x00F000,            // Bright Green
-                                             0x00F0F0,            // Bright Yellow
-                                             0xF0F000,            // Bright Cyan
-                                             0xF0F0F0             // Bright White
-                                    };
+		/// <summary>
+		/// The regular speccy palette
+		/// </summary>
+		//      public int[] NormalColors =
+		//{
+		//	0x000000,            // Blacks
+		//	0x0000C0,            // Red
+		//	0xC00000,            // Blue
+		//	0xC000C0,            // Magenta
+		//	0x00C000,            // Green
+		//	0x00C0C0,            // Yellow
+		//	0xC0C000,            // Cyan
+		//	0xC0C0C0,            // White
+		//	0x000000,            // Bright Black
+		//	0x0000F0,            // Bright Red
+		//	0xF00000,            // Bright Blue
+		//	0xF000F0,            // Bright Magenta
+		//	0x00F000,            // Bright Green
+		//	0x00F0F0,            // Bright Yellow
+		//	0xF0F000,            // Bright Cyan
+		//	0xF0F0F0             // Bright White
+		//};
 
-        //Misc variables
-        protected int val, addr;
+		public int[] NormalColors =
+		{
+			0x000000,0x0000d8,0xd80000,0xd800d8,0x00d800,0x00d8d8,0xd8d800,0xd8d8d8,
+			0x000000,0x0000ff,0xff0000,0xff00ff,0x00ff00,0x00ffff,0xffff00,0xffffff,
+		};
+
+		//Misc variables
+		protected int val, addr;
         public bool isROMprotected = true;  //not really used ATM
         public bool needsPaint = false;     //Raised when the ULA has finished painting the entire screen
         protected bool CapsLockOn = false;
@@ -6015,17 +6024,8 @@ namespace Speccy
                 goto jmp4Undoc;
             return dis;
         }
-        public void SetEmulationSpeed(int speed) {
-            /* if (speed == 0) {
-                speed = MAX_CPU_SPEED;
-                soundTStatesToSample = 79;
-                beeper.SetVolume(2.0f);
-            } else {
-                beeper.SetVolume(soundVolume);
-                soundTStatesToSample = (int)((FrameLength * (50.0f * (speed / 100.0f))) / 44100.0f);
-            }
-
-            emulationSpeed = (speed - 100) / 100; //0 = normal.*/
+        public void SetEmulationSpeed(int speed)
+		{
             emulationSpeed = speed;
         }
 
@@ -6088,26 +6088,23 @@ namespace Speccy
         }
 
         public void InsertBookmark() {
-            if (isRecordingRZX) {
-                //rzx.InsertBookmark(CreateSZX(), rzxInputs);
+            if (isRecordingRZX)
+			{
                 rzx.UpdateRecording(cpu.t_states);
                 rzx.Bookmark(CreateSZX());
             }
         }
 
-        public void RollbackRZX() {
-
-            //SZXFile snapshot = rzx.Rollback();
+        public void RollbackRZX()
+		{
             rzx.UpdateRecording(cpu.t_states);
             rzx.Rollback();
-            //if (snapshot != null)
-            //    UseSZX(snapshot);
         }
 
-        public void DiscardRZX() {
+        public void DiscardRZX()
+		{
             isRecordingRZX = false;
             isPlayingRZX = false;
-            //rzx.Discard();
         }
 
         public void SaveRZX(bool doFinalise) {
@@ -6126,7 +6123,8 @@ namespace Speccy
             }
         }
 
-        public void StartRecordingRZX(string filename, System.Action<RZXFileEventArgs> callback) {
+        public void StartRecordingRZX(string filename, System.Action<RZXFileEventArgs> callback)
+		{
             rzx = new RZXFile();
 #if NEW_RZX_METHODS
             rzx.RZXFileEventHandler += callback;
@@ -6138,15 +6136,10 @@ namespace Speccy
             isPlayingRZX = false;
             isRecordingRZX = true;
 
-            //rzx.record.tstatesAtStart = (uint)cpu.t_states;
-            //rzx.record.flags |= 0x2; //Frames are compressed.
-            //rzx.snapshotData[0] = CreateSZX().GetSZXData();
-
         }
 
-        public bool IsValidSessionRZX() {
-            //if (!rzx.IsValidSession())
-            //    return false;
+        public bool IsValidSessionRZX()
+		{
 
             isPlayingRZX = false;
             isRecordingRZX = true;
@@ -6252,28 +6245,23 @@ namespace Speccy
             //http://worldofspectrum.org/forums/showthread.php?t=34574&page=3
         }
 
-        protected void FlashLoadTape() {
+        protected void FlashLoadTape()
+		{
             if (!tape_flashLoad)
                 return;
-
-            //if (TapeEvent != null)
-            //    OnTapeEvent(new TapeEventArgs(TapeEventType.FLASH_LOAD));
             DoTapeEvent(new TapeEventArgs(TapeEventType.FLASH_LOAD));
         }
 
-        
-        //public byte[] GetPageData(int page) {
-        //    return RAMpage[page * 2];
-        //}
-
-        public void AddDevice(SpeccyDevice newDevice) {
+        public void AddDevice(ISpectrumDevice newDevice)
+		{
             RemoveDevice(newDevice.DeviceID);
             attached_devices[(int)newDevice.DeviceID] = newDevice;
             newDevice.RegisterDevice(this);
         }
 
-        public void RemoveDevice(SPECCY_DEVICE deviceId) {
-            SpeccyDevice dev;
+        public void RemoveDevice(SPECTRUM_DEVICE deviceId)
+		{
+            ISpectrumDevice dev;
             if (attached_devices.TryGetValue((int)deviceId, out dev)) {
                 dev.UnregisterDevice(this);
             }
@@ -6394,14 +6382,8 @@ namespace Speccy
         }
 
         //Shutsdown the speccy
-        public virtual void Shutdown() {
-            //THREAD
-            //if (!isSuspended)
-            //{
-            //    doRun = false;
-            //    emulationThread.Join();
-            //    emulationThread = null;
-            // }
+        public virtual void Shutdown()
+		{
 
             lock (lockThis) {
                 beeper.Shutdown();
@@ -6422,7 +6404,8 @@ namespace Speccy
             }
         }
 
-        private void OnTapeEdgeDecA() {
+        private void OnTapeEdgeDecA()
+		{
             if (tapeIsPlaying && tape_edgeLoad)
                 if (PeekByteNoContend(cpu.regs.PC) == 0x20)
                     if (PeekByteNoContend((ushort)(cpu.regs.PC + 1)) == 0xfd) {
@@ -6439,14 +6422,16 @@ namespace Speccy
                     }
         }
 
-        private void OnTapeEdgeCpA() {
+        private void OnTapeEdgeCpA()
+		{
             if (tape_readToPlay && !tapeTrapsDisabled)
                 if(cpu.regs.PC == 0x56b)
                     FlashLoadTape();
         }
 
         //Re-engineered SpecEmu version. Works a treat!
-        private void OnTapeEdgeDetection() {
+        private void OnTapeEdgeDetection()
+		{
             //Return if not tape is inserted in Tape Deck
             if (!tape_readToPlay || !tape_edgeLoad)
                 return;
@@ -6556,7 +6541,6 @@ namespace Speccy
                                         break;
 
                                     default:
-                                        //doLoop = false;
                                         break;
                                 }
                             }
@@ -6638,8 +6622,6 @@ namespace Speccy
                                     tapeIsPlaying = true;
                                     tape_AutoStarted = true;
                                     tape_stopTimeOut = TAPE_TIMEOUT;
-                                    //if (TapeEvent != null)
-                                    //    OnTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE)); //Yes! Start tape!
                                     DoTapeEvent(new TapeEventArgs(TapeEventType.START_TAPE));
                                     tapeTStates = 0;
                                 }
@@ -6727,7 +6709,6 @@ namespace Speccy
                         if (emulationSpeed > 1 && rep != emulationSpeed - 1)
                         {
                             needsPaint = false;
-                            //System.Threading.Thread.Sleep(1); //TO DO: Remove?
                         }
                     
                         break;
@@ -6760,10 +6741,11 @@ namespace Speccy
 
         //Same as PeekByte, except specifically for opcode fetches in order to
         //trigger Memory Execute in debugger.
-        public byte GetOpcode(int addr) {
+        public byte GetOpcode(int addr)
+		{
             addr &= 0xffff;
-            //Contend(addr, 3, 1);
-            if (IsContended(addr)) {
+            if (IsContended(addr))
+			{
                 cpu.t_states += contentionTable[cpu.t_states];
             }
 
@@ -6781,9 +6763,10 @@ namespace Speccy
         }
 
         //Returns the byte at a given 16 bit address (can be contended)
-        public byte PeekByte(ushort addr) {
-            //Contend(addr, 3, 1);
-            if (IsContended(addr)) {
+        public byte PeekByte(ushort addr)
+		{
+            if (IsContended(addr))
+			{
                 cpu.t_states += contentionTable[cpu.t_states];
             }
 
@@ -6800,20 +6783,23 @@ namespace Speccy
             return _b;
         }
 
-        //Returns the byte at a given 16 bit address (can be contended)
-        public virtual void PokeByte(ushort addr, byte b) {
+		//Writes the byte at a given 16 bit address (can be contended)
+		public virtual void PokeByte(ushort addr, byte b)
+		{
             //This call flags a memory change event for the debugger
             if (MemoryWriteEvent != null)
                 OnMemoryWriteEvent(new MemoryEventArgs(addr, b));
 
-            if (IsContended(addr)) {
+            if (IsContended(addr))
+			{
                 cpu.t_states += contentionTable[cpu.t_states];
             }
             cpu.t_states += 3;
             int page = (addr) >> 13;
             int offset = (addr) & 0x1FFF;
 
-            if (((addr & 49152) == 16384) && (PageReadPointer[page][offset] != b)) {
+            if (((addr & 49152) == 16384) && (PageReadPointer[page][offset] != b))
+			{
                 UpdateScreenBuffer(cpu.t_states);
             }
 
@@ -6821,13 +6807,15 @@ namespace Speccy
         }
 
         //Pokes a 16 bit value at given address. Contention applies.
-        public void PokeWord(ushort addr, ushort w) {
+        public void PokeWord(ushort addr, ushort w)
+		{
             PokeByte(addr, (byte)(w & 0xff));
             PokeByte((ushort)(addr + 1), (byte)(w >> 8));
         }
 
         //Pokes bytes from an array into a ram bank.
-        public void PokeRAMPage(int bank, int dataLength, byte[] data) {
+        public void PokeRAMPage(int bank, int dataLength, byte[] data)
+		{
             for (int f = 0; f < dataLength; f++) {
                 int indx = f / 8192;
                 RAMpage[bank * 2 + indx][f % 8192] = data[f];
@@ -6835,15 +6823,17 @@ namespace Speccy
         }
 
         //Pokes bytes from an array into contiguous rom banks.
-        public void PokeROMPages(int bank, int dataLength, byte[] data) {
+        public void PokeROMPages(int bank, int dataLength, byte[] data)
+		{
             for (int f = 0; f < dataLength; f++) {
                 int indx = f / 8192;
                 ROMpage[bank * 2 + indx][f % 8192] = data[f];
             }
         }
 
-        //Pokes the byte at a given 16 bit address with no contention
-        public void PokeByteNoContend(int addr, int b) {
+		//Pokes the byte at a given 16 bit address with no contention
+		public void PokeByteNoContend(int addr, int b)
+		{
             addr &= 0xffff;
             b &= 0xff;
 
@@ -6854,7 +6844,8 @@ namespace Speccy
         }
 
         //Pokes  byte from an array at a given 16 bit address with no contention
-        public void PokeBytesNoContend(int addr, int dataOffset, int dataLength, byte[] data) {
+        public void PokeBytesNoContend(int addr, int dataOffset, int dataLength, byte[] data)
+		{
             int page, offset;
 
             for (int f = dataOffset; f < dataOffset + dataLength; f++, addr++) {
@@ -6866,7 +6857,8 @@ namespace Speccy
         }
 
         //Returns a value from a port (can be contended)
-        public virtual byte In(ushort port) {
+        public virtual byte In(ushort port)
+		{
             //Raise a port I/O event
             if (PortEvent != null)
                 OnPortEvent(new PortIOEventArgs(port, 0, false));
@@ -6887,13 +6879,15 @@ namespace Speccy
 
         //Outputs a value to a port (can be contended)
         //The base call is used only to raise memory events
-        public virtual void Out(ushort port, byte val) {
+        public virtual void Out(ushort port, byte val)
+		{
             //Raise a port I/O event
             if (PortEvent != null)
                 OnPortEvent(new PortIOEventArgs(port, val, true));
         }
 
-        public virtual bool IsKempstonActive(int port) {
+        public virtual bool IsKempstonActive(int port)
+		{
             if (UseKempstonPort1F) {
                 if ((port & 0xe0) == 0)
                     return true;
@@ -6903,11 +6897,14 @@ namespace Speccy
 
             return false;
         }
+
         //Updates the state of the renderer
-        public virtual void UpdateScreenBuffer(int _tstates) {
+        public virtual void UpdateScreenBuffer(int _tstates)
+		{
             if (_tstates < ActualULAStart) {
                 return;
-            } else if (_tstates >= FrameLength) {
+            } else if (_tstates >= FrameLength)
+			{
                 _tstates = FrameLength - 1;
                 //Since we're updating the entire screen here, we don't need to re-paint
                 //it again in the  process loop on framelength overflow.
@@ -6923,137 +6920,133 @@ namespace Speccy
             int numBytes = (elapsedTStates >> 2) + ((elapsedTStates % 4) > 0 ? 1 : 0);
 
             int pixelData;
-            int pixel2Data = 0xff;
+            //int pixel2Data = 0xff;
             int attrData;
-            int attr2Data;
+            //int attr2Data;
             int bright;
             int ink;
             int paper;
             int flash;
 
-            for (int i = 0; i < numBytes; i++) {
-                if (tstateToDisp[lastTState] > 1) {
-                   // for (int p = 0; p < 2; p++) {
-                        screenByteCtr = tstateToDisp[lastTState] - 16384; //adjust for actual screen offset
+            for (int i = 0; i < numBytes; i++)
+			{
+                if (tstateToDisp[lastTState] > 1)
+				{
+					screenByteCtr = tstateToDisp[lastTState] - 16384; //adjust for actual screen offset
                   
-                        pixelData = screen[screenByteCtr];
-                        attrData = screen[attr[screenByteCtr] - 16384];
+					pixelData = screen[screenByteCtr];
+					attrData = screen[attr[screenByteCtr] - 16384];
 
-                        lastPixelValue = pixelData;
-                        lastAttrValue = attrData;
-                       /* if ((I & 0x40) == 0x40) {
-                            {
-                                if (p == 0) {
-                                    screenByteCtr = (screenByteCtr + 16384) | (R & 0xff);
-                                    pixel2Data = screenByteCtr & 0xff;
-                                }
-                                else
-                                    screenByteCtr = (screenByteCtr + 16384) | (pixel2Data);
-                                pixelData = screen[(screenByteCtr - 1) - 16384];
-                                lastAttrValue = screen[attr[(screenByteCtr - 1) - 16384] - 16384];
-                            }
-                        }
-                        */
-                        bright = (attrData & 0x40) >> 3;
-                        flash = (attrData & 0x80) >> 7;
-                        ink = (attrData & 0x07);
-                        paper = ((attrData >> 3) & 0x7);
-                        int paletteInk = AttrColors[ink + bright];
-                        int palettePaper = AttrColors[paper + bright];
+					lastPixelValue = pixelData;
+					lastAttrValue = attrData;
+					bright = (attrData & 0x40) >> 3;
+					flash = (attrData & 0x80) >> 7;
+					ink = (attrData & 0x07);
+					paper = ((attrData >> 3) & 0x7);
+					int paletteInk = AttrColors[ink + bright];
+					int palettePaper = AttrColors[paper + bright];
 
-                        if (flashOn && (flash != 0)) //swap paper and ink when flash is on
-                        {
-                            int temp = paletteInk;
-                            paletteInk = palettePaper;
-                            palettePaper = temp;
-                        }
+					if (flashOn && (flash != 0)) //swap paper and ink when flash is on
+					{
+						int temp = paletteInk; paletteInk = palettePaper; palettePaper = temp;
+					}
 
-                        if (ula_plus.Enabled && ula_plus.PaletteEnabled) {
-                            paletteInk = ula_plus.Palette[(((flash << 1) + (bright >> 3)) << 4) + ink]; //(flash*2 + bright) * 16 + ink
-                            palettePaper = ula_plus.Palette[(((flash << 1) + (bright >> 3)) << 4) + paper + 8]; //(flash*2 + bright) * 16 + paper + 8
-                        }
+					if (ula_sx != null && ula_sx.Enabled)
+					{
+						int temp;
+						temp = attrData;
+						temp = (temp & 0xC0) >> 3;
+						temp = temp | ink;
+						paletteInk = ula_sx.PaletteInk[temp];
+						palettePaper=ula_sx.PalettePaper[paper];
+					}
 
-                        for (int a = 0; a < 8; ++a) {
-                            if ((pixelData & 0x80) != 0) {
-                                //PAL interlacing
-                                //int pal = paletteInk/2 + (0xffffff - LastScanlineColor[lastScanlineColorCounter]/2);
-                                //ScreenBuffer[ULAByteCtr++] = pal;
-                                //LastScanlineColor[lastScanlineColorCounter++] = paletteInk;
-                                ScreenBuffer[ULAByteCtr++] = paletteInk;
-                                lastAttrValue = ink;
-                            } else {
-                                //PAL interlacing
-                                //int pal = palettePaper/2 + (0xffffff - LastScanlineColor[lastScanlineColorCounter]/2);
-                                //ScreenBuffer[ULAByteCtr++] = pal;
-                                //LastScanlineColor[lastScanlineColorCounter++] = palettePaper;
-                                ScreenBuffer[ULAByteCtr++] = palettePaper;
-                                lastAttrValue = paper;
-                            }
-                            pixelData <<= 1;
-                        }                 
-                    // pixelData = lastPixelValue;
-                } else if (tstateToDisp[lastTState] == 1) {
+					for (int a = 0; a < 8; ++a)
+					{
+						if ((pixelData & 0x80) != 0)
+						{
+							//PAL interlacing
+							ScreenBuffer[ULAByteCtr++] = paletteInk;
+							lastAttrValue = ink;
+						} else
+						{
+							//PAL interlacing
+							ScreenBuffer[ULAByteCtr++] = palettePaper;
+							lastAttrValue = paper;
+						}
+						pixelData <<= 1;
+					}     
+                }
+				else if (tstateToDisp[lastTState] == 1)
+				{
                     int bor;
-                    if (ula_plus.Enabled && ula_plus.PaletteEnabled) {
-                        bor = ula_plus.Palette[borderColour + 8];
-                    } else
-                        bor = AttrColors[borderColour];
-
-                    for(int g = 0; g < 8; g++) {
+					bor = AttrColors[borderColour];
+                    for(int g = 0; g < 8; g++)
+					{
                         //PAL interlacing
-                        //int pal = bor/2 + (0xffffff -  LastScanlineColor[lastScanlineColorCounter]/2);
-                        //ScreenBuffer[ULAByteCtr++] = pal;
-                        //LastScanlineColor[lastScanlineColorCounter++] = bor;                        
                         ScreenBuffer[ULAByteCtr++] = bor;
                     }
                 }
                 lastTState += 4;
-
-                if(lastScanlineColorCounter >= ScanLineWidth)
-                    lastScanlineColorCounter = 0;
+				if (lastScanlineColorCounter >= ScanLineWidth) { lastScanlineColorCounter = 0; }
             }
         }
-
         // Wrapper for ULA events
-        public void UpdateScreenBuffer() {
+        public void UpdateScreenBuffer()
+		{
             UpdateScreenBuffer(cpu.t_states);
         }
-
         //Loads in the ROM for the machine
         public abstract bool LoadROM(string path, string filename);
 
         //Updates the state of all inputs from the user
-        public void UpdateInput() {
+        public void UpdateInput()
+		{
 
 #region Row 0: fefe - CAPS SHIFT, Z, X, C , V
 
-            if (keyBuffer[(int)keyCode.SHIFT]) {
+            if (keyBuffer[(int)keyCode.SHIFT])
+			{
                 keyLine[0] = keyLine[0] & ~(0x1);
-            } else {
+            }
+			else
+			{
                 keyLine[0] = keyLine[0] | (0x1);
             }
 
-            if (keyBuffer[(int)keyCode.Z]) {
+            if (keyBuffer[(int)keyCode.Z])
+			{
                 keyLine[0] = keyLine[0] & ~(0x02);
-            } else {
+            }
+			else
+			{
                 keyLine[0] = keyLine[0] | (0x02);
             }
 
-            if (keyBuffer[(int)keyCode.X]) {
+            if (keyBuffer[(int)keyCode.X])
+			{
                 keyLine[0] = keyLine[0] & ~(0x04);
-            } else {
+            }
+			else
+			{
                 keyLine[0] = keyLine[0] | (0x04);
             }
 
-            if (keyBuffer[(int)keyCode.C]) {
+            if (keyBuffer[(int)keyCode.C])
+			{
                 keyLine[0] = keyLine[0] & ~(0x08);
-            } else {
+            }
+			else
+			{
                 keyLine[0] = keyLine[0] | (0x08);
             }
 
-            if (keyBuffer[(int)keyCode.V]) {
+            if (keyBuffer[(int)keyCode.V])
+			{
                 keyLine[0] = keyLine[0] & ~(0x10);
-            } else {
+            }
+			else
+			{
                 keyLine[0] = keyLine[0] | (0x10);
             }
 
@@ -7061,33 +7054,48 @@ namespace Speccy
 
 #region Row 1: fdfe - A, S, D, F, G
 
-            if (keyBuffer[(int)keyCode.A]) {
+            if (keyBuffer[(int)keyCode.A])
+			{
                 keyLine[1] = keyLine[1] & ~(0x1);
-            } else {
+            }
+			else
+			{
                 keyLine[1] = keyLine[1] | (0x1);
             }
 
-            if (keyBuffer[(int)keyCode.S]) {
+            if (keyBuffer[(int)keyCode.S])
+			{
                 keyLine[1] = keyLine[1] & ~(0x02);
-            } else {
+            }
+			else
+			{
                 keyLine[1] = keyLine[1] | (0x02);
             }
 
-            if (keyBuffer[(int)keyCode.D]) {
+            if (keyBuffer[(int)keyCode.D])
+			{
                 keyLine[1] = keyLine[1] & ~(0x04);
-            } else {
+            }
+			else
+			{
                 keyLine[1] = keyLine[1] | (0x04);
             }
 
-            if (keyBuffer[(int)keyCode.F]) {
+            if (keyBuffer[(int)keyCode.F])
+			{
                 keyLine[1] = keyLine[1] & ~(0x08);
-            } else {
+            }
+			else
+			{
                 keyLine[1] = keyLine[1] | (0x08);
             }
 
-            if (keyBuffer[(int)keyCode.G]) {
+            if (keyBuffer[(int)keyCode.G])
+			{
                 keyLine[1] = keyLine[1] & ~(0x10);
-            } else {
+            }
+			else
+			{
                 keyLine[1] = keyLine[1] | (0x10);
             }
 
@@ -7095,33 +7103,48 @@ namespace Speccy
 
 #region Row 2: fbfe - Q, W, E, R, T
 
-            if (keyBuffer[(int)keyCode.Q]) {
+            if (keyBuffer[(int)keyCode.Q])
+			{
                 keyLine[2] = keyLine[2] & ~(0x1);
-            } else {
+            }
+			else
+			{
                 keyLine[2] = keyLine[2] | (0x1);
             }
 
-            if (keyBuffer[(int)keyCode.W]) {
+            if (keyBuffer[(int)keyCode.W])
+			{
                 keyLine[2] = keyLine[2] & ~(0x02);
-            } else {
+            }
+			else
+			{
                 keyLine[2] = keyLine[2] | (0x02);
             }
 
-            if (keyBuffer[(int)keyCode.E]) {
+            if (keyBuffer[(int)keyCode.E])
+			{
                 keyLine[2] = keyLine[2] & ~(0x04);
-            } else {
+            }
+			else
+			{
                 keyLine[2] = keyLine[2] | (0x04);
             }
 
-            if (keyBuffer[(int)keyCode.R]) {
+            if(keyBuffer[(int)keyCode.R])
+			{
                 keyLine[2] = keyLine[2] & ~(0x08);
-            } else {
+            }
+			else
+			{
                 keyLine[2] = keyLine[2] | (0x08);
             }
 
-            if (keyBuffer[(int)keyCode.T]) {
+            if (keyBuffer[(int)keyCode.T])
+			{
                 keyLine[2] = keyLine[2] & ~(0x10);
-            } else {
+            }
+			else
+			{
                 keyLine[2] = keyLine[2] | (0x10);
             }
 
@@ -7372,16 +7395,19 @@ namespace Speccy
         // unchanged onto the stack as it is already the correct return address."
         // When loading or saving snapshots we need to account for the old behaviour and increment PC so that we emulate
         // correctly post-load or during save.
-        protected virtual void CorrectPCForHalt() {
-            if (cpu.is_halted) {
+        protected virtual void CorrectPCForHalt()
+		{
+            if (cpu.is_halted)
+			{
                 cpu.regs.PC++;
             }
         }
 
-        public virtual void SaveSNA(string filename) {
+        public virtual void SaveSNA(string filename)
+		{
             SNA_SNAPSHOT snapshot;
 
-            if (model == MachineModel._48k || model == MachineModel._NTSC48k)
+            if (model == MachineModel._48k)
                 snapshot = new SNA_48K();
             else
                 snapshot = new SNA_128K();
@@ -7405,7 +7431,7 @@ namespace Speccy
             snapshot.HEADER.IM = (byte)cpu.interrupt_mode;
             snapshot.HEADER.BORDER = (byte)borderColour;
 
-            if (model == MachineModel._48k || model == MachineModel._NTSC48k) {
+            if (model == MachineModel._48k) {
                 ushort snap_pc = cpu.regs.PC;
                 if (cpu.is_halted) {
                     snap_pc--;
@@ -7518,7 +7544,8 @@ namespace Speccy
             
             if (szx.paletteLoaded)
             {
-                if (ula_plus == null) {
+                if (ula_plus == null)
+				{
                     ula_plus = new ULA_Plus();
                     AddDevice(ula_plus);
                 }
@@ -7560,7 +7587,8 @@ namespace Speccy
             else
                 cpu.regs.MemPtr = (ushort)(szx.z80Regs.MemPtr & 0xff);
 
-            for (int f = 0; f < 16; f++) {
+            for (int f = 0; f < 16; f++)
+			{
                 Array.Copy(szx.RAM_BANK[f], 0, RAMpage[f], 0, 8192);
             }
         }
@@ -7720,25 +7748,76 @@ namespace Speccy
 
         //Enables/Disables AY sound
         public virtual void EnableAY(bool val) {
-            if (model == MachineModel._48k) {
+            if (model == MachineModel._48k)
+			{
                 HasAYSound = val;
-                if (val) {
+                if (val)
+				{
                     AY_8192 ay_device = new AY_8192();
                     AddDevice(ay_device);
                 }
-                else {
-                    RemoveDevice(SPECCY_DEVICE.AY_3_8912);
+                else
+				{
+                    RemoveDevice(SPECTRUM_DEVICE.AY_3_8912);
                 }
             }
-            else {
+            else
+			{
                 HasAYSound = true;
                 AY_8192 ay_device = new AY_8192();
                 AddDevice(ay_device);
             }
         }
+		//Enables/Disables EDGEMASTER
+		public virtual void EnableEDGEMASTER(bool flag)
+		{
+			if (model == MachineModel._48k)
+			{
+				if (flag)
+				{
+					EdgeMaster.Core.EdgeMaster em=new EdgeMaster.Core.EdgeMaster();
+					AddDevice(em);
+				}
+				else
+				{
+					RemoveDevice(SPECTRUM_DEVICE.EDGEMASTER);
+				}
+			}
+		}
+		public virtual void EnableIOTester(bool flag)
+		{
+			if (model == MachineModel._48k)
+			{
+				if (flag)
+				{
+					EdgeMasterTester it = new EdgeMasterTester();
+					AddDevice(it);
+				}
+				else
+				{
+					RemoveDevice(SPECTRUM_DEVICE.EDGEMASTERTESTER);
+				}
+			}
+		}
+		public virtual void EnableULASX(bool flag)
+		{
+			if (model == MachineModel._48k)
+			{
+				if (flag)
+				{
+					ULA_SX ulasx=new ULA_SX();
+					this.ula_sx = ulasx;
+					AddDevice(ulasx);
+				}
+				else
+				{
+					RemoveDevice(SPECTRUM_DEVICE.ULA_SX);
+				}
+			}
+		}
 
-        //Sets up the contention table for the machine
-        public abstract void BuildContentionTable();
+		//Sets up the contention table for the machine
+		public abstract void BuildContentionTable();
 
         //Builds the tstate to attribute map used for floating bus
         public void BuildAttributeMap() {
@@ -7774,16 +7853,20 @@ namespace Speccy
         public abstract bool IsContended(int addr);
 
         //Contends the machine for a given address (_addr)
-        public void Contend(int _addr) {
-            if (model != MachineModel._plus3 && IsContended(_addr)) {
+        public void Contend(int _addr)
+		{
+            if (IsContended(_addr))
+			{
                 cpu.t_states += contentionTable[cpu.t_states];
             }
         }
 
         //Contends the machine for a given address (_addr) for n tstates (_time) for x times (_count)
         public void Contend(int _addr, int _time, int _count) {
-            if (model != MachineModel._plus3 && IsContended(_addr)) {
-                for (int f = 0; f < _count; f++) {
+            if (IsContended(_addr))
+			{
+                for (int f = 0; f < _count; f++)
+				{
                     cpu.t_states += contentionTable[cpu.t_states] + _time;
                 }
             } else
@@ -7985,13 +8068,16 @@ namespace Speccy
         public void Process() {
             //Handle re-triggered interrupts!
             bool ran_interrupt = false;
-            if (cpu.iff_1  && cpu.t_states < InterruptPeriod) {
-
-                if (cpu.interrupt_count == 0) {
-                    if (cpu.parityBitNeedsReset) {
+            if (cpu.iff_1  && cpu.t_states < InterruptPeriod)
+			{
+                if (cpu.interrupt_count == 0)
+				{
+                    if (cpu.parityBitNeedsReset)
+					{
                         cpu.SetParity(false);
                     }
-                    if (isRecordingRZX) {
+                    if (isRecordingRZX)
+					{
 #if NEW_RZX_METHODS
                         rzx.UpdateRecording(cpu.t_states);
 #else
@@ -8012,40 +8098,40 @@ namespace Speccy
 
             //Check if TR DOS needs to be swapped for Pentagon 128k.
             //TR DOS is swapped in when PC >= 15616 and swapped out when PC > 16383.
-            if (model == MachineModel._pentagon) {
-                if (trDosPagedIn) {
-                    if (cpu.regs.PC > 0x3FFF) {
-                        if ((last7ffdOut & 0x10) != 0) {
-                            //48k basic
-                            PageReadPointer[0] = ROMpage[2];
-                            PageReadPointer[1] = ROMpage[3];
-                            PageWritePointer[0] = JunkMemory[0];
-                            PageWritePointer[1] = JunkMemory[1];
-                            BankInPage0 = ROM_48_BAS;
-                            lowROMis48K = true;
-                        } else {
-                            //128k basic
-                            PageReadPointer[0] = ROMpage[0];
-                            PageReadPointer[1] = ROMpage[1];
-                            PageWritePointer[0] = JunkMemory[0];
-                            PageWritePointer[1] = JunkMemory[1];
-                            BankInPage0 = ROM_128_BAS;
-                            lowROMis48K = false;
-                        }
-                        trDosPagedIn = false;
-                    }
-                }
-                else if (lowROMis48K) {
-                     if ((cpu.regs.PC >> 8) == 0x3d) {
-                        PageReadPointer[0] = ROMpage[4];
-                        PageReadPointer[1] = ROMpage[5];
-                        PageWritePointer[0] = JunkMemory[0];
-                        PageWritePointer[1] = JunkMemory[1];
-                        trDosPagedIn = true;
-                        BankInPage0 = ROM_TR_DOS;
-                    }
-                } 
-            }
+            //if (model == MachineModel._pentagon) {
+            //    if (trDosPagedIn) {
+            //        if (cpu.regs.PC > 0x3FFF) {
+            //            if ((last7ffdOut & 0x10) != 0) {
+            //                //48k basic
+            //                PageReadPointer[0] = ROMpage[2];
+            //                PageReadPointer[1] = ROMpage[3];
+            //                PageWritePointer[0] = JunkMemory[0];
+            //                PageWritePointer[1] = JunkMemory[1];
+            //                BankInPage0 = ROM_48_BAS;
+            //                lowROMis48K = true;
+            //            } else {
+            //                //128k basic
+            //                PageReadPointer[0] = ROMpage[0];
+            //                PageReadPointer[1] = ROMpage[1];
+            //                PageWritePointer[0] = JunkMemory[0];
+            //                PageWritePointer[1] = JunkMemory[1];
+            //                BankInPage0 = ROM_128_BAS;
+            //                lowROMis48K = false;
+            //            }
+            //            trDosPagedIn = false;
+            //        }
+            //    }
+            //    else if (lowROMis48K) {
+            //         if ((cpu.regs.PC >> 8) == 0x3d) {
+            //            PageReadPointer[0] = ROMpage[4];
+            //            PageReadPointer[1] = ROMpage[5];
+            //            PageWritePointer[0] = JunkMemory[0];
+            //            PageWritePointer[1] = JunkMemory[1];
+            //            trDosPagedIn = true;
+            //            BankInPage0 = ROM_TR_DOS;
+            //        }
+            //    } 
+            //}
 
             if (!ran_interrupt) {
                 prevT = cpu.t_states;
@@ -8134,7 +8220,8 @@ namespace Speccy
         }
 
         //Processes an interrupt
-        public void Interrupt() {
+        public void Interrupt()
+		{
             if (cpu.interrupt_mode < 2) //IM0 = IM1 for our purpose
             {
                 //When interrupts are enabled we can be sure that the reset sequence is over.
@@ -8154,7 +8241,6 @@ namespace Speccy
             cpu.Interrupt();
             deltaTStates = cpu.t_states - oldT;
             timeToOutSound += deltaTStates; 
-            //UpdateAudio(deltaT);
         }
 
         public void StopTape(bool cancelCallback = false) {

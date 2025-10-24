@@ -7,14 +7,14 @@ namespace FileAssoc
     {
         private bool runError = true;
 
-        public Form1() {
+        public Form1()
+		{
             this.Visible = false;
             InitializeComponent();
             if (!IsUserAdministrator()) {
                 MessageBox.Show("You need to have admin privileges to continue.", "Access denied!", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 Environment.ExitCode = -1;
                 return;
-                //this.Close();
             }
             string[] commandLineArgs = Environment.GetCommandLineArgs();
             if (commandLineArgs.Length > 1) {

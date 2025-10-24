@@ -1,7 +1,7 @@
 ﻿using SpeccyCommon;
 
 namespace Speccy {
-    public class KempstonJoystick : IODevice, SpeccyDevice {
+    public class KempstonJoystick : IODevice, ISpectrumDevice {
         //The original Kempston used port #1f to decode.
         //Various clones however used port #df.
         public bool UsePort1F = false;
@@ -10,7 +10,7 @@ namespace Speccy {
         //On the Kempston, the active bits are set to 1 (high).
         public byte JoystickState = 0;
 
-        public SPECCY_DEVICE DeviceID { get { return SPECCY_DEVICE.KEMPSTON_JOYSTICK; } }
+        public SPECTRUM_DEVICE DeviceID { get { return SPECTRUM_DEVICE.KEMPSTON_JOYSTICK; } }
 
         public bool Responded { get; set; }
 

@@ -1,0 +1,40 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\Dev\\CSharp\\Zero-Emulator-EM\\Ziggy\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E2B90D77-77E9-43E4-99E8-4C89D7613837}|..\\ZiggyWin\\ZiggyWin\\ZeroWin.csproj|e:\\dev\\csharp\\zero-emulator-em\\ziggywin\\ziggywin\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "E:\\Dev\\CSharp\\Zero-Emulator-EM\\ZiggyWin\\ZiggyWin\\Form1.cs",
+              "RelativeDocumentMoniker": "..\\ZiggyWin\\ZiggyWin\\Form1.cs",
+              "ToolTip": "E:\\Dev\\CSharp\\Zero-Emulator-EM\\ZiggyWin\\ZiggyWin\\Form1.cs*",
+              "RelativeToolTip": "..\\ZiggyWin\\ZiggyWin\\Form1.cs*",
+              "ViewState": "AgIAAJUIAAAAAAAAAIAxwKkIAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-24T07:43:19.727Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -20,7 +20,7 @@ namespace Speccy
         public bool TapeEdgeDetected = false;
         public bool TapeBitWasFlipped = false;
         
-        public SPECCY_DEVICE DeviceID { get { return SPECCY_DEVICE.ULA_48K; } }
+        public SPECTRUM_DEVICE DeviceID { get { return SPECTRUM_DEVICE.ULA_48K; } }
 
         public bool Responded { get; set; }
         public bool Issue2Keyboard { get; set; }

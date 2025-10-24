@@ -44,42 +44,25 @@ namespace SpeccyCommon
         LAST
     };
 
-    public enum SPECCY_DEVICE {
+    public enum SPECTRUM_DEVICE {
         ULA_48K,
-        ULA_Pentagon,
         ULA_PLUS,
         KEMPSTON_JOYSTICK,
         SINCLAIR1_JOYSTICK,
         SINCLAIR2_JOYSTICK,
         CURSOR_JOYSTICK,
         KEMPSTON_MOUSE,
-        AY_3_8912
+        AY_3_8912,
+		EDGEMASTER,
+		ULA_SX,
+		EDGEMASTERTESTER
     };
 
     //Matches SZX snapshot machine identifiers
-    public enum MachineModel {
-        [Description("Spectrum 16k")]
-        _16k,
+    public enum MachineModel
+	{
         [Description("Spectrum 48k")]
         _48k,
-        [Description("Spectrum 128k")]
-        _128k,
-        [Description("Spectrum Plus 2")]
-        _plus2,
-        [Description("Spectrum Plus 2A")]
-        _plus2A,
-        [Description("Spectrum Plus 3")]
-        _plus3,
-        [Description("Spectrum Plus 3E")]
-        _plus3E,
-        [Description("Pentagon 128k")]
-        _pentagon,
-        [Description("Spectrum SE")]
-        _SE = 11,
-        [Description("Spectrum 48k (NTSC)")]
-        _NTSC48k = 15,
-        [Description("Spectrum 128ke")]
-        _128ke = 16
     };
 
     //Handy enum for Monitor

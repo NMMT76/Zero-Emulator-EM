@@ -227,17 +227,21 @@ namespace Speccy
         // No        | Yes        | N:1 C:3
         // Yes       | Yes        | C:1 C:3
         // Yes       | No         | C:1 C:1 C:1 C:1
-        public override byte In(ushort port) {
+        public override byte In(ushort port)
+		{
             base.In(port);
 
-            if (isPlayingRZX) {
-                if (rzx.inputCount < rzx.frame.inputCount) {
-                    if (rzx.frame.inputs == null) {
+            if (isPlayingRZX)
+			{
+                if (rzx.inputCount < rzx.frame.inputCount)
+				{
+                    if (rzx.frame.inputs == null)
+					{
                         System.Windows.Forms.MessageBox.Show("Invalid RZX frame. Expected: " + rzx.frame.inputCount.ToString() + " . Actual: 0", "RZX playback error", System.Windows.Forms.MessageBoxButtons.OK);
                     }
-                    else {
+                    else
+					{
                         rzxIN = rzx.frame.inputs[rzx.inputCount];
-
                     }
                 }
                 rzx.inputCount++;
@@ -252,17 +256,22 @@ namespace Speccy
 
             bool device_responded = false;
 
-            if (!lowBitReset) {        
-                foreach (var d in io_devices) {
-                    result = d.In(port);
-                    if (d.Responded) {
-                        device_responded = true;
+            if (!lowBitReset)
+			{        
+                foreach (var d in io_devices)
+				{
+                    if (d.Responded)
+					{
+						result = d.In(port);
+						device_responded = true;
                         base.In(port, result);
                     }
                 }
             }
-            if (!device_responded) {
-                if (lowBitReset) {                 //Even address, so get input
+            if (!device_responded)
+			{
+                if (lowBitReset)
+				{                 //Even address, so get input
                     if (!externalSingleStep) {
                         if ((port & 0x8000) == 0)
                             result &= (byte)keyLine[7];
@@ -541,19 +550,24 @@ namespace Speccy
                 PageWritePointer[6] = RAMpage[(int)RAM_BANK.ZERO_LOW];
                 PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
-                if (szx.paletteLoaded) {
-                    if (ula_plus == null) {
+                if (szx.paletteLoaded)
+				{
+                    if (ula_plus == null)
+					{
                         ula_plus = new ULA_Plus();
                         AddDevice(ula_plus);
                     }
                     ula_plus.Enabled = true;
-                    if (szx.palette.flags == 1) {                     
+                    if (szx.palette.flags == 1)
+					{                     
                         ula_plus.PaletteEnabled = true;
-                    } else if (ula_plus != null) {
+                    } else if (ula_plus != null)
+					{
                         ula_plus.PaletteEnabled = false;
                     }
                     ula_plus.PaletteGroup = szx.palette.currentRegister;
-                    for (int f = 0; f < 64; f++) {
+                    for (int f = 0; f < 64; f++)
+					{
                         byte val = szx.palette.paletteRegs[f];
                         int bl = val & 0x01;
                         int bm = bl;
@@ -581,7 +595,8 @@ namespace Speccy
 
         public override void UseZ80(Z80_SNAPSHOT z80) {
             base.UseZ80(z80);
-            lock (lockThis) {
+            lock (lockThis)
+			{
 
                 EnableAY(z80.AY_FOR_48K);
 
@@ -617,7 +632,8 @@ namespace Speccy
                 PageWritePointer[7] = RAMpage[(int)RAM_BANK.ZERO_HIGH];
 
                 //Check if we are halted.
-                if (PeekByteNoContend(cpu.regs.PC) == 0x76) {
+                if (PeekByteNoContend(cpu.regs.PC) == 0x76)
+				{
                     cpu.is_halted = true;
                     CorrectPCForHalt();
                 }
