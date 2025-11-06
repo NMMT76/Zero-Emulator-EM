@@ -1,164 +1,44 @@
+Fork of ArjunNair's Zero Emulator, trimmed down to ZX Spectrum 48K only and with added EdgeMaster "virtual expansion device" and ULA-SX (simple expansion) support.
 
-# Zero - A ZX Spectrum Emulator
-Zero is a spectrum emulator written entirely on the .NET platform, using C#, and requires .NET framework 4.7 or above.
+A potential implementation of the EdgeMaster in real hardware would/should always be based about some form of microcontroller, as that allows the simplest form of "expansion through code"
 
-The philosophy behind Zero is to provide a highly accurate emulation of the various Spectrum models while also providing a nice, user friendly experience. 
+The whole idea behind the EdgeMaster, so named because it does NOT do DMA/busmastering, was that, given a "slow enough" platform, even a simple PIO device implementing a very basic form of RPC could:
+1. provide infinite expansion/functionality
+2. provide some form of acceleration
+bounded only by:
+- the IO speed
+- the external "coprocessor" speed
 
-![Zero running Exolon](zero_hero.png)
+While 1 is quite self evident, 2 is a bit more complicated. For it to be true, the time of execution for the "original code" needs to be higher than the time it takes to push data to the EM, do whatever work needs to be done and get the results back from the EM.
 
-## Features 
-* Emulates the 48k, 128k, 128k SE, the Spectrum +2 and the Spectrum +3 (with 2 disk drives), and the Pentagon 128k models.
+(all results from here on are based on Zero running on a R5 5600, YMMV)
 
-* Supports the following tape formats: TZX, TAP, CSW, and PZX. It only saves .TAP files though.
+One of the "weakest" part of the ZX is floating point operations. As show in EM_Tests_MathBasic, delegating the operations to the EM, even the basic math floating point functions will be "slightly faster" to "4x faster".
+When you go to trigonometric functions, as in EM_Tests_BENCH01, the speed gains become very evident, in two different ways. One, the EM is so fast that is spends most of the time waiting for the ZX to fetch the results, the ZX is never waiting on the EM to finish. Two, because of the former, from the ZX point of view, the time the EM takes for a simple operation is no different from the time the EM takes to perform a not so simple operation. EM_Tests_BENCH02 and EM_Tests_BENCH03 perfectly illustrate this.
 
-* Supports the following snapshot formats: SZX, SNA, and the Z80. It can save to SNA and SZX formats.
+EM_Tests_BENCH04 is just an adaptation of [ZX Basic's](https://github.com/boriel-basic/zxbasic) Mandelbrot demo. Unlike all the other "benchmarks", this one shows the EM assisted version before the "plain" version. You'll understand why when you run it.
 
-* Supports the following disk formats: DSK, TRD and SCL.
+In the EM_Suite folder you can also find the EM_Base.bas file which is a "base include" to help using the EM from ZX Basic.
 
-* Supports the playback and recording (with rollback) of RZX files.
+A word of warning or reminder, as i had to "rediscover" this almost 40y past. The Z80 does NOT have a cache. Loops ARE expensive. The following image shows how "raw transfer" speed to/from the EM changes with the amount of "unrolling". The graph is an "S shaped" curve where the impact of the loop start very high and then proceeds to becom negligible with diminishing returns as the unrol becomes larger. The difference between the write and the read speeds is attibutable to the fact that in the test the ZX is writing a constant value to the EM but is reading a value from the EM and writing it to memory.
 
-* Supports the AY-3-8192 sound chip and ULA Plus.
-  
-* Supports the Kempston, Cursor and Sinclair joystick as well as the Kempston mouse. 
+The graph also showcases the tradeoff with have with a simple PIO device. While with "modest" unrolls you can get speeds in the 20-60KB/s range, which is huge by ZX standards, we aren't even close to "50fps full frame transfer" speeds. That is definetelly "DMA territory". This is clearly illustrated in the EM_PlayVideo_Bad_Apple frame.
 
-* There is a built-in debugger with modern conveniences like step-in, step-over, logging and breakpoint facilities.
+A crude adaptation of Gabriel Gambetta's (https://www.gabrielgambetta.com/zx-raytracer.html) raytracer, while buggy, clearly illustrated the imense speedup in "computationally heavy" tasks. EM_ZXRaytracer.png
 
-* Other stuff: Virtual tape drive, POK file support, Zip file support, et al.
-  
+If you made it this far, and haven't just straight out jumped into the code to see how it works, here is a brief summary, but refer to the examples in EM_Suite and EM_Base.bas and code comments for more specifics:
 
-## Using the Emulator
-The entire emulator is controlled and configured via the menu bar at the top. Additional options are under the Tools section in the menu.
+The EM has two read/write ports, a dataport (63) and a command port(191). It uses a "virtual table" of functions, with 0-2 being reserved. 0 is "reset", forcing the EM to reset itself, 1 is "Register action" and 2 is "Load library" (not implemented).
+To execute an action you must first register it by pushing the desired vtable "slot" you want (3-255), pushing a null terminated string of the action name to the dataport and pushing 1 to the commandport. Then you read the command port until you get 0 back. EMRegisterAction() from EM_Base does all this for you
+Once an action is registered, you simply push whatever data the action needs to the dataport, push the previously registers action number to the command port and read the command port until it returns 0. EMRunCommand() and EMRunCommandNoWait() from EM_Base do this for you. If using EMRunCommand(), you're doing synchronous calls and the action will be finished when it returns. If EMRunCommandNoWait() you're doing asynchronous calls, and MUST check that the action has finished before fetching results by checkign if the command port returns 0.
+Once the action is finished, you read whatever the result was from the dataport. Mind you that different actions have different results, and for lack of documentation, please refer to their implementation in EMInternalLib().
 
-## Using the Keyboard
-Zero emulates the speccy keyboard faithfully and provides some additional functionality via the PC keyboard.
+While Zero-EM is more of a "developer fun" thing, that would allow ZX/C# developers to push the machine in very creative ways, there is nothing whatsoever stopping it from being real hardware. By being a PIO device, the entry bar is quite low and there's no shortage of current microcontrollers that would be up to the task of providing at the very least "basic functionality", like "pseudo RAM expansion", "file IO", "accelerated math", etc... Running in an emulator only makes it easier to showase ideas because you don't need real hardware to test them.
 
-The Shift Keys on the PC keyboard act as Caps Shift for the speccy, while the Control keys act as Symbol Shift. 
-For example, to enter LOAD "" on Zero: First press J to bring up the LOAD keyword and then press Ctrl+P twice (J, Ctrl+P, Ctrl+P).
+Closing notes:
 
-To enter extended mode press Shift and Ctrl key together.
+The EM includes provision for "quasi-DMA", where the EM writes to memory mimicking the Z80. This is NOT accurate, and should only be used in "what if the EM COULD do DMA?" investigative scenarios. CaptureImageBWPIO() and CaptureImageBWDMA() showcase it (in a VERY crude way). A (proper) EM-DMA device would have far more impressive capabilities than "regular EM" due to not needing the Z80 to do the "read bus, write memory" part, but it would also not be such a simple and unassuming implementation. Speed<>Simplicity tradeoff.
 
-In addition, you can type in symbols like + , - ? etc directly from the PC keyboard as usual. Of course, the normal speccy entry method will work as well.
+Zero-EM also includes an "extra", the ULA-SX (simple expansion). While similar to the ULAX, it takes a different view on how to repurpose the attibute bits. While the ULAX uses BRIGHT/FLASH as a "bank index", the ULA-SX uses them to extend the foreground color by two bits, effectivelly giving 32/8 foreground/background color. While the ULA-SX has less than the theoretical ULAX maximum combinations, it makes the artist life "simpler" as any foreground/background is available in any attribute block. All colors RGB value can be redefined by the user. Please refer to ULA_SX.cs for more information. The ULASXDEMO showcases it using the (close to) standard ZX 8c background colors with 32 foreground colors in a gradient from black to white. The ULA-SX wouldn't be a too far fetched thing to "make happen" as it fundamentally only requires a few "bytes" (internal registers) more than the original ULA, but unlike the EM it would require "internal changes" to the machine and not just and "add on device".
 
-If you're in the habit of forgetting what key does what on the speccy (like me!), I recommend you use the SEBasic ROM or the Gosh Wonderful for the 48k, which support full typing (i.e to do LOAD "" you would actually have to type it in one letter at a time like on the PC). 
-
-The following key combinations are used by Zero:
-
-**Emulator Window**
-
-Shortcut Key    | Function  
-----------------|-----------
-F2              | Tape Browser
-F3 		          | Debugger
-F4		          | Search Infoseek
-F5     		      | Pause Emulation
-F6		          | Acquire/Release Mouse (May first need to enable mouse emulation in Options)
-F7		          | New RZX Recording
-F8	            | Finalise RZX Recording
-F9		          | Stop RZX Recording
-Ins / Tab		          | Insert RZX Bookmark
-Del		          | Rollback RZX to previous bookmark
-Alt+F8 		      | Discard RZX Recording
-Alt+F4  	      | Exit emulator
-Ctrl+F5		      | Reset Emulator
-Alt+F6		      | Unacquire mouse
-Ctrl+O   	      | Open File
-Ctrl+S   	      | Save snapshot
-Ctrl+Shift+S     | Save screenshot
-Ctrl+K		        | Show 48k Keyboard helper
-Alt+0           | 100% window size
-Alt+ +   	      | Increase window size by 50% of original speccy size
-Alt+ -   	      | Decrease window size by 50% of original speccy size
-Alt+Enter 	    | Full screen toggle
-
-**Debugger**
-
-Shortcut Key    | Function  
-----------------|-----------
-F5		          | Resume Emulation
-F10		          | Step Over
-F11		          | Step In
-F12 		        | Step Out
-Alt+B		        | Show Breakpoints Editor
-Alt+S		        | Show Machine State
-Alt+V		        | Show Memory Viewer
-Alt+R		        | Show Registers
-Alt+L		        | Show Execution Log
-Alt+P		        | Poke Memory
-
-
-## Command line options
-Zero can be fully configured via the command line by passing parameters in the following format:
-```
-zero [file][-option [value]]
-```
-The following options are available:
-
-Option            | Parameters    | Function  
-------------------|---------------|------------------------------------------------
--f                |               | Launches the emulator in full screen mode
--s                |               | Enables pixel smoothing
--v                |               | Enables vertical syncing
--g                |               | Use GDI instead of DirectX for rendering
--i                |               | Enables display interlacing (scanlines)
--l                |               | Enables late timings
--p                | ula+/ulaplus/grayscale/normal |  Selects a colour palette
--m                | 48k/128k/128ke/plus3/pentagon128k | Selects a spectrum machine model
--e                | 1 to 10       | Sets the emulation speed (1 = Normal)
--c                | 1/2/4/8/14    | CPU Multiplier (3.5 MHz * multiplier)
--w                | multiples of 50 | Selects a window size as a percentage increment of speccy size (0 = no increment, 50 = 50% increment, etc)
--b                | mini/medium/full | Sets the emulated border size
--q                | see below       |  Plays back commands in a queue
-
-Available playback commands:
-```
-/loadfile "filename"    : Loads a file given the path
-/waitframes N           : Waits for N frames before processing next command
-/trace "filename"       : Starts a trace log to the given filename
-/stoptrace              : Stops the above trace logging
-/savesnap "filename"    : Saves the current emulation state as a snapshot
-/debug                  : Opens the debugger
-/exit                   : Exits the emulator
-```
-
-Examples:
-1) Open the emulator in full screen, with scanlines and ULA+ palette enabled:
-```
-zero.exe -f -s -c ula+
-```
-1) Open a file, use late timings and enable mini borders:
-```
-zero.exe -q "exolon.pzx" -l -b mini
-```
-1) Open a file, wait for 2 frames, start trace logging, wait for 5 frames, stop the logging and shutdown emulator:
-```
-zero.exe -q "exolon.pzx" /waitframes 2 /startrace "exolon_trace.log" /waitframes 5 /stoptrace /exit
-```
-
-## Uninstalling Zero
-If you installed the emulator using the Setup, simply run the uninstaller to uninstall the emulator.It's generally a good idea to uninstall a previous version of the emulator before installing a new one.
-
-If you used the .zip version, simply delete the folder in which Zero resides.
-
-## Building the project using source
-The project currently uses Visual Studio 2019 Community edition (free). It may not be compatible with older Visual Studio editions. I recommend downloading VS 2019 Community as it's almost like the professional version (supports plugins for example) and is free to download from here: http://www.visualstudio.com/en-us/news/vs2013-community-vs.aspx
-
-
-## Important
-If you're unable to launch the emulator or the emulator crashes immediately on launching, you may need to install an additional DirectX component, which can be found here: http://www.microsoft.com/en-us/download/details.aspx?id=810
-
-## Acknowledgements
-Many thanks to Mark Woodmass (Woody) for his patient and detailed technical advice on various aspects of emulation, and to Rich Chandler, Paul Dunn (Dunny) and others on the ZX Spectrum discord group for their help and feedback. This emulator wouldn't have been possible otherwise without their considerable encouragement and support.
-
-Thanks also to Patrik Rak for permission to use the various PZX conversion tools that Zero uses to support other tape format. You can find more information on them on Patrik's site: http://zxds.raxoft.cz/pzx.html.
-
-Thanks to Alex Makeev for permission to use his DirectSound routines from ZXMAK 2.
-
-Thanks go out to Dr. Phil Kendall and others for putting together the CSS FAQ, which helped me figure out some of the nuances of the Spectrum hardware and peripherals.
-
-I must also thank my wife Poornima for putting up with my obsession with the speccy and even providing encouragement and help with this project!
-
-Additional contributors whose feedback have helped in shaping the emulator are credited in the What's New file.
-
-## License & Copyrights
-Copyright (c) 2009-2024 Arjun Nair. See the LICENSE file for license rights and limitations (MIT).  
-Zero uses various public domain icons. Copyright rests with their respective authors. 
+Now with all said, go and have fun. What whacky stuff can you do with your "expanded ZX"?
