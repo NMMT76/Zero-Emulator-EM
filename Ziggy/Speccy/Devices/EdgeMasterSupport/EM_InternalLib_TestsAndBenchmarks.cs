@@ -207,54 +207,6 @@ namespace EdgeMaster.Core
 				emdevice.SetNotRunning();
 			});
 		}
-		//Action to speed up Gabriel Gambetta's ZX Spectrum Raytracer
-		//(https://www.gabrielgambetta.com/zx-raytracer.html)
-		//While it mostly works, it has a bug somewhere and is not producing the correct
-		//result. And right now i don't have time to hunt it down...
-		private void TraceRay()
-		{
-			emdevice.SetRunning();
-			Task.Run(() =>
-			{
-				
-				double[,] _spheres = new double[,] { { 0, -1, 4, 1, 2 }, { 2, 0, 4, 1, 1 }, { -2, 0, 4, 1, 4 }, { 0, -5001, 0, 5000 ^ 2, 6 } };
-
-				byte x = emdevice.ReadByteFromOutQueue();
-				double RDX = ((x-16.0)/32.0);
-				byte y = emdevice.ReadByteFromOutQueue();
-				double RDY = ((11.0- y)/32.0);
-				byte z = emdevice.ReadByteFromOutQueue();
-				double RDZ = 1 * 1.0;
-				double TMIN = 0;
-				double TMAX = 100000;
-				double ROX = 0.0;
-				double ROY = 0.0;
-				double ROZ = 0.0;
-				int COL = -1;
-				double MINT = 0;
-
-				int spherecount=_spheres.GetLength(0);
-
-				for (int c = 0; c < spherecount; c++)
-				{
-					double COX = ROX - _spheres[c,0];
-					double COY = ROY - _spheres[c, 1];
-					double COZ = ROZ - _spheres[c, 2];
-					double EQA=RDX*RDX + RDY * RDY + RDZ * RDZ;
-					double EQB = 2 * (RDX * COX + RDY * COY + RDZ * COZ);
-					double EQC = (COX * COX + COY * COY + COZ * COZ) - _spheres[c, 3] * _spheres[c, 3];
-					double DISC = EQB * EQB - 4 * EQA * EQC;
-					if (DISC < 0) { continue; }
-					double T1 = (-EQB + Math.Sqrt(DISC)) / 2 * EQA;
-					double T2 = (-EQB - Math.Sqrt(DISC)) / 2 * EQA;
-					if(T1>=TMIN && T1<=TMAX &&(T1<MINT || COL==-1)) { COL = (int)_spheres[c, 4]; MINT = T1; }
-					if(T2 >= TMIN && T2 <= TMAX && (T2 < MINT || COL == -1)) { COL = (int)_spheres[c, 4]; MINT = T2; }
-				}
-				if(COL == -1) { COL = 0; }
-				emdevice.WriteByteToInQueue((byte)COL);
-				emdevice.SetNotRunning();
-			});
-		}
 	}
 }
 

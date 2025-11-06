@@ -463,6 +463,17 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="EM_Suite\EMTester\EMTester_RawThroughput.tzx" />
+    <None Include="EM_Suite\EM_Base.tzx" />
+    <None Include="EM_Suite\EM_Benchmarks\EM_Tests_BENCH01.tzx" />
+    <None Include="EM_Suite\EM_Benchmarks\EM_Tests_BENCH02.tzx" />
+    <None Include="EM_Suite\EM_Benchmarks\EM_Tests_BENCH03.tzx" />
+    <None Include="EM_Suite\EM_Benchmarks\EM_Tests_BENCH04.tzx" />
+    <None Include="EM_Suite\EM_Benchmarks\EM_Tests_MathBasic.tzx" />
+    <None Include="EM_Suite\EM_Tests_File.tzx" />
+    <None Include="EM_Suite\EM_Tests_LoadScreen.tzx" />
+    <None Include="EM_Suite\EM_Tests_PlayVideo.tzx" />
+    <None Include="EM_Suite\ULASX\ulasxdemo_bb.tzx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -524,6 +535,25 @@
     <None Include="Resources\B_button.png" />
     <None Include="Resources\icons8-keyboard-26.png" />
     <None Include="Resources\cassette.png" />
+    <Content Include="EM_Suite\EMTester\EMTester_RawThroughput.bas" />
+    <Content Include="EM_Suite\EMTester\EMTester_RawThroughputUnrolls.bas" />
+    <Content Include="EM_Suite\EM_Base.bas" />
+    <Content Include="EM_Suite\EM_Benchmarks\EM_PCWBench.bas" />
+    <Content Include="EM_Suite\EM_Benchmarks\EM_PCWBench_EM.bas" />
+    <Content Include="EM_Suite\EM_Benchmarks\EM_Tests_BENCH01.bas" />
+    <Content Include="EM_Suite\EM_Benchmarks\EM_Tests_BENCH02.bas" />
+    <Content Include="EM_Suite\EM_Benchmarks\EM_Tests_BENCH03.bas" />
+    <Content Include="EM_Suite\EM_Benchmarks\EM_Tests_BENCH04.bas" />
+    <Content Include="EM_Suite\EM_Benchmarks\EM_Tests_MathBasic.bas" />
+    <Content Include="EM_Suite\EM_PlayVideo_Bad_Apple.png" />
+    <Content Include="EM_Suite\EM_Tests_File.bas" />
+    <Content Include="EM_Suite\EM_Tests_LoadScreen.bas" />
+    <Content Include="EM_Suite\EM_Tests_PlayVideo.bas" />
+    <Content Include="EM_Suite\EM_UnrolledTransferSpeed.png" />
+    <Content Include="EM_Suite\EM_WebCam.png" />
+    <Content Include="EM_Suite\EM_ZXRaytracer.png" />
+    <Content Include="EM_Suite\ULASX\ULASXDEMO.png" />
+    <Content Include="EM_Suite\ULASX\ulasxdemo_bb.bas" />
     <Content Include="fdc765.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -550,6 +580,7 @@
       <Name>Speccy</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -99,7 +99,6 @@ namespace EdgeMaster.Core
 			//Benchmarks and tests
 			#region BenchmarkTestTag
 			emdevice.AddAction("ADDSUBMULDIV", ADDSUBMULDIV);
-			emdevice.AddAction("TRACERAY", TraceRay);
 			emdevice.AddAction("SRQTSINFL", SRQTSINFL);
 			emdevice.AddAction("COSSRQTSINFL", COSSRQTSINFL);
 			emdevice.AddAction("LOGCOSSRQTSINFL", LOGCOSSRQTSINFL);
