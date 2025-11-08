@@ -1,6 +1,9 @@
 # Zero-EM
 Fork of ArjunNair's Zero Emulator, trimmed down to ZX Spectrum 48K only and with added EdgeMaster "virtual expansion device" and ULA-SX (simple expansion) support.
+
 A potential implementation of the EdgeMaster in real hardware would/should always be based about some form of microcontroller, as that allows the simplest form of "expansion through code"
+
+While Zero-EM is more of a "developer fun" thing, that would allow ZX/C# developers to push the machine in very creative ways, there is nothing whatsoever stopping it from being real hardware. By being a PIO device, the entry bar is quite low and there's no shortage of current microcontrollers that would be up to the task of providing at the very least "basic functionality", like "pseudo RAM expansion", "file IO", "accelerated math", etc... Running in an emulator only makes it easier to showcase ideas because you don't need real hardware to test them.
 
 # Acknowledgements
 First off, many thanks for [Arjun Nair](https://github.com/ArjunNair) without whom this wouldn't have been possible. Zero having such a good structure for devices, unlike many other emulators, made it a very nice experience to create the EM. Also many thanks to [Jose Rodriguez-Rosa](https://github.com/boriel-basic/zxbasic) as without ZX Basic, the ZX side of the code would neither be so "clean" or efficient. To [György Kőszeg](https://github.com/koszeggy/KGySoft.Drawing) for his image library that is at the core of the image conversion process into B&W images. To [NAudio](https://github.com/naudio/NAudio) for the great audio library that allows the ZX to play MP3 (and more) through the host. To [DirectShow.Net](https://directshownet.sourceforge.net/) for the webcam capture capabilities. And last but not least to [Accord](http://accord-framework.net/) for the video "capture" capabilites.
@@ -43,11 +46,13 @@ A crude adaptation of Gabriel Gambetta's (https://www.gabrielgambetta.com/zx-ray
 If you made it this far, and haven't just straight out jumped into the code to see how it works, here is a brief summary, but refer to the examples in EM_Suite and EM_Base.bas and code comments for more specifics:
 
 The EM has two read/write ports, a dataport (63) and a command port(191). It uses a "virtual table" of functions, with 0-2 being reserved. 0 is "reset", forcing the EM to reset itself, 1 is "Register action" and 2 is "Load library" (not implemented).
-To execute an action you must first register it by pushing the desired vtable "slot" you want (3-255), pushing a null terminated string of the action name to the dataport and pushing 1 to the commandport. Then you read the command port until you get 0 back. EMRegisterAction() from EM_Base does all this for you
-Once an action is registered, you simply push whatever data the action needs to the dataport, push the previously registers action number to the command port and read the command port until it returns 0. EMRunCommand() and EMRunCommandNoWait() from EM_Base do this for you. If using EMRunCommand(), you're doing synchronous calls and the action will be finished when it returns. If EMRunCommandNoWait() you're doing asynchronous calls, and MUST check that the action has finished before fetching results by checkign if the command port returns 0.
-Once the action is finished, you read whatever the result was from the dataport. Mind you that different actions have different results, and for lack of documentation, please refer to their implementation in EMInternalLib().
 
-While Zero-EM is more of a "developer fun" thing, that would allow ZX/C# developers to push the machine in very creative ways, there is nothing whatsoever stopping it from being real hardware. By being a PIO device, the entry bar is quite low and there's no shortage of current microcontrollers that would be up to the task of providing at the very least "basic functionality", like "pseudo RAM expansion", "file IO", "accelerated math", etc... Running in an emulator only makes it easier to showcase ideas because you don't need real hardware to test them.
+To execute an action you must first register it by pushing the desired vtable "slot" you want (3-255), pushing a null terminated string of the action name to the dataport and pushing 1 to the commandport. Then you read the command port until you get 0 back. 
+EMRegisterAction() from EM_Base does all this for you
+
+Once an action is registered, you simply push whatever data the action needs to the dataport, push the previously registers action number to the command port and read the command port until it returns 0. EMRunCommand() and EMRunCommandNoWait() from EM_Base do this for you. If using EMRunCommand(), you're doing synchronous calls and the action will be finished when it returns. If EMRunCommandNoWait() you're doing asynchronous calls, and MUST check that the action has finished before fetching results by checkign if the command port returns 0.
+
+Once the action is finished, you read whatever the result was from the dataport. Mind you that different actions have different results, and for lack of documentation, please refer to their implementation in EMInternalLib().
 
 # Closing notes
 
