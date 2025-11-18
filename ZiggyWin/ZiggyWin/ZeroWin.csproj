@@ -473,6 +473,7 @@
     <None Include="EM_Suite\EM_Tests_File.tzx" />
     <None Include="EM_Suite\EM_Tests_LoadScreen.tzx" />
     <None Include="EM_Suite\EM_Tests_PlayVideo.tzx" />
+    <None Include="EM_Suite\EM_Tests_PlayVideoDMA.tzx" />
     <None Include="EM_Suite\ULASX\ulasxdemo_bb.tzx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -549,6 +550,7 @@
     <Content Include="EM_Suite\EM_Tests_File.bas" />
     <Content Include="EM_Suite\EM_Tests_LoadScreen.bas" />
     <Content Include="EM_Suite\EM_Tests_PlayVideo.bas" />
+    <Content Include="EM_Suite\EM_Tests_PlayVideoDMA.bas" />
     <Content Include="EM_Suite\EM_UnrolledTransferSpeed.png" />
     <Content Include="EM_Suite\EM_WebCam.png" />
     <Content Include="EM_Suite\EM_ZXRaytracer.png" />
