@@ -175,7 +175,22 @@ namespace EdgeMaster.Core
 				emdevice.WriteZXFloatToInQueue(pow2);
 				emdevice.SetNotRunning();
 			});
-		}		
+		}
+		private void RNDFL()
+		{
+			emdevice.SetRunning();
+			Task.Run(() =>
+			{
+				//standard .net
+				double rnd = emdevice.Rng.NextDouble();
+				emdevice.WriteZXFloatToInQueue(rnd);
+				emdevice.SetNotRunning();
+				//Mersenne-Twister
+				//double rnd = emdevice.MTRng.Generate();
+				//emdevice.WriteZXFloatToInQueue(rnd);
+				//emdevice.SetNotRunning();
+			});
+		}
 		private void SIN8()
 		{
 			emdevice.SetRunning();

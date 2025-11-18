@@ -1169,27 +1169,13 @@ namespace ZeroWin
             SetState(0);
         }
 
-        public void SetState(MonitorState state) {
+        public void SetState(MonitorState state)
+		{
             switch (state) {
                 case MonitorState.RUN:
                     dbState = MonitorState.RUN;
-                    //pauseEmulation = false;
                     ziggyWin.zx.Resume();
                     ziggyWin.zx.doRun = true;
-                    /** Thread code
-                    if (breakPointList.Count == 0)
-                        DeRegisterAllEvents();
-
-                    if (ziggyWin.zx.isSuspended)
-                        ziggyWin.zx.Resume();
-                    else
-                    {
-                        lock (ziggyWin.zx.lockThis2)
-                        {
-                            ziggyWin.zx.monitorIsRunning = false;
-                            System.Threading.Monitor.Pulse(ziggyWin.zx.lockThis2);
-                        }
-                    }*/
                     break;
 
                 case MonitorState.PAUSE:
@@ -1203,17 +1189,13 @@ namespace ZeroWin
                 case MonitorState.STEPIN:
                     dbState = MonitorState.STEPIN;
                     ziggyWin.zx.Resume();
-                    //pauseEmulation = false;
                     ziggyWin.zx.doRun = true;
-                    //ziggyWin.zx.Resume();
                     break;
 
                 case MonitorState.STEPOUT:
                     dbState = MonitorState.STEPOUT;
                     ziggyWin.zx.Resume();
-                    //pauseEmulation = false;
                     ziggyWin.zx.doRun = true;
-                    //ziggyWin.zx.Resume();
                     break;
             }
         }
@@ -1221,8 +1203,6 @@ namespace ZeroWin
         public void RefreshMemory(int from) {
             this.SuspendLayout();
             dataGridView1.DataSource = null;
-            //int line = disassemblyList.Find("Address", from);
-            //Disassemble(disassemblyList[line].Address, 65535, line, false);
             Disassemble(0, 65535, true, false);
             dataGridView1.DataSource = disassemblyList;
             this.ResumeLayout();
@@ -1238,13 +1218,11 @@ namespace ZeroWin
             foreach (Control c in Controls) {
                 c.Font = System.Drawing.SystemFonts.MessageBoxFont;
             }
-            //dataGridView1.DoubleBuffered(true);
 
             this.SuspendLayout();
 
             dataGridView1.ColumnHeadersBorderStyle = ProperColumnHeadersBorderStyle;
             dataGridView1.CellValidating += new DataGridViewCellValidatingEventHandler(dataGridView1_CellValidating);
-            //dataGridView1.CellDoubleClick += new DataGridViewCellEventHandler(dataGridView1_CellDoubleClick);
             dataGridView1.CellEndEdit += new DataGridViewCellEventHandler(dataGridView1_CellEndEdit);
             dataGridView1.CellToolTipTextNeeded += new DataGridViewCellToolTipTextNeededEventHandler(dataGridView1_CellToolTipTextNeeded);
             
@@ -1280,7 +1258,6 @@ namespace ZeroWin
 
             
             //clear any previously set columns
-            //dataGridView1.Columns.Clear();
             dataGridView1.AutoGenerateColumns = false;
             DataGridViewTextBoxColumn dgridColAddress = new DataGridViewTextBoxColumn();
             dgridColAddress.HeaderText = "Address";

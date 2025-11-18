@@ -3,6 +3,7 @@ using EdgeMaster.Interfaces;
 using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
 using Speccy;
+using Speccy.Devices.EdgeMasterSupport;
 using SpeccyCommon;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EdgeMaster.Core
@@ -74,6 +76,10 @@ namespace EdgeMaster.Core
 		public Random Rng { get { return _rng; } }
 		private byte[] rngbuffer = new byte[1024];
 		private int rngcounter = 0;
+
+		//EM's private MTRNG, both serves as a real RNG and as a source of "floating bus" values
+		private MTRandom _mtrng = MTRandom.Instance;
+		public MTRandom MTRng { get { return _mtrng; } }
 
 		//The data in/out buffers. Queues are perfect here because, much like
 		//it would in real hardware, one side pushes, the other side pulls.
@@ -292,6 +298,11 @@ namespace EdgeMaster.Core
 			byte[] bytes = ReadBytesFromOutQueue(4);
 			return (uint)(bytes[0]+ bytes[1] * 256+ bytes[2] * 256*256+ bytes[3] * 256 * 256 * 256);
 		}
+		public ushort ReadUIntegerFromOutQueue()
+		{
+			byte[] bytes = ReadBytesFromOutQueue(2);
+			return (ushort)(bytes[0] + bytes[1] * 256);
+		}
 		public void WriteULongToInQueue(UInt32 value)
 		{
 			byte[] bytes = BitConverter.GetBytes(value);
@@ -353,10 +364,29 @@ namespace EdgeMaster.Core
 			retval=ZXUtility.ZXFloatToDouble(bytes);
 			return retval;
 		}
+		public double ReadZXFloatFromMemory(ushort addr)
+		{
+			double retval = 0.0;
+			byte[] bytes = new byte[5];
+			for (int c = 0; c < 5; c++)
+			{
+				bytes[c] = host.PeekByteNoContend((ushort)(addr+c));
+			}
+			retval = ZXUtility.ZXFloatToDouble(bytes);
+			return retval;
+		}
 		public void WriteZXFloatToInQueue(double value)
 		{
 			byte[] bytes=ZXUtility.DoubleToZXFloat(Math.Round(value,8));
 			WriteBytesToInQueue(bytes);
+		}
+		public void WriteZXFloatToMemory(ushort addr,double val)
+		{
+			byte[] bytes = ZXUtility.DoubleToZXFloat(Math.Round(val, 8));
+			for (int c = 0; c < 5; c++)
+			{
+				host.PokeByteNoContend(addr+c, bytes[c]);
+			}
 		}
 		public void PokeByteDMA(ushort addr, byte val)
 		{
@@ -836,18 +866,21 @@ namespace EdgeMaster.Core
 			switch (quantizer)
 			{
 				case 0:
-					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), OrderedDitherer.Bayer2x2);
+					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite());
 					break;
 				case 1:
-					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), OrderedDitherer.Bayer4x4);
+					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), OrderedDitherer.Bayer2x2);
 					break;
 				case 2:
-					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), OrderedDitherer.Bayer8x8);
+					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), OrderedDitherer.Bayer4x4);
 					break;
 				case 3:
-					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), ErrorDiffusionDitherer.FloydSteinberg);
+					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), OrderedDitherer.Bayer8x8);
 					break;
 				case 4:
+					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), ErrorDiffusionDitherer.FloydSteinberg);
+					break;
+				case 5:
 					quantized = scaled.ConvertPixelFormat(PixelFormat.Format1bppIndexed, PredefinedColorsQuantizer.BlackAndWhite(), OrderedDitherer.DottedHalftone);
 					break;
 			}

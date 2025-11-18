@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 using EdgeMaster.Interfaces;
 using Accord.Video.FFMPEG;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace EdgeMaster.Core
 {
 	// Benchmark Actions showcasing EM's acceleration of math intensive programs
 	public partial class EMInternalLib : IEMLibrary
 	{
+		List<byte[]> videoframes = new List<byte[]>();
+		int lastvideoframe = -1;
 		private void PlayVideoFileBW()
 		{
 			emdevice.SetRunning();
@@ -63,6 +66,122 @@ namespace EdgeMaster.Core
 				emdevice.SetNotRunning();
 			});
 		}
+		private void LoadVideoFileBW()
+		{
+			emdevice.SetRunning();
+			Task.Run(() =>
+			{
+				videoframes = new List<byte[]>();
+				lastvideoframe = -1;
+
+				string video = emdevice.ReadStringFromOutQueue();
+				byte quant = emdevice.ReadByteFromOutQueue();
+				byte invert = emdevice.ReadByteFromOutQueue();
+				byte frameskip = emdevice.ReadByteFromOutQueue();
+
+				if (File.Exists(video))
+				{
+					VideoFileReader reader = new VideoFileReader();
+					reader.Open(video);
+					if (reader.FrameCount > 0)
+					{
+						int totalframes = 0;
+						for (int i = 0; i < reader.FrameCount; i++)
+						{
+							Bitmap frame = reader.ReadVideoFrame();
+							if (frame != null)
+							{
+								if (i % frameskip == 0)
+								{
+									totalframes++;
+									byte[] framebytes = ZXUtility.BitmapToScreenMemory(frame, quant);
+									if (invert !=0)
+									{
+										for (int c = 0; c < framebytes.Length; c++)
+										{
+											framebytes[c] = (byte)(~framebytes[c]);
+										}
+									}
+									videoframes.Add(framebytes);
+								}
+							}
+							frame.Dispose();
+						}
+						//NOTE on the bellow: Tests with random video files showed that on real world cases,
+						//the average transfer would float around 3K if transfering only the changed bytes,
+						//meaning that with a properly curated video file this "DMA simulacrum" is good enough
+						//as a showcase of what a DMA device could do IF its running from interrupt code AND
+						//is taking less than the VBI period would allow it. Still not cycle accurate so, fun
+						//purposes only
+
+						//Just a "developement file" with the frame to frame delta values so we can externally
+						//graph the number of bytes that actually need to be written to memory. All things being
+						//equal, on average it should be WAY bellow a full frame meaning that for the most part
+						//we should be well clear of the "danger zone" when it comes to holding the bus too long.
+						//int cb = 0;
+						//if (totalframes > 0)
+						//{
+						//	string deltafile = Path.Combine(Application.StartupPath, "delta.csv");
+						//	Console.WriteLine(deltafile);
+						//	if (File.Exists(deltafile))
+						//	{
+						//		File.Delete(deltafile);
+						//	}
+						//	for (int frame = 1; frame < videoframes.Count; frame++)
+						//	{
+						//		cb = 0;
+						//		for (int c = 0; c < ZXUtility.MemoryScreenLength; c++)
+						//		{
+						//			if (videoframes[frame - 1][c] != videoframes[frame][c])
+						//			{
+						//				cb++;
+						//			}
+						//		}
+						//		File.AppendAllText(deltafile, $"{cb};{System.Environment.NewLine}");
+						//	}
+						//}
+						emdevice.WriteULongToInQueue((uint)totalframes);
+					}
+					else
+					{
+						//Write zero length, no frames
+						emdevice.WriteBytesToInQueue(new byte[] { 0, 0, 0, 0 });
+					}
+					reader.Close();
+				}
+				else
+				{
+					//Write zero length, no file
+					emdevice.WriteBytesToInQueue(new byte[] { 0, 0, 0, 0 });
+				}
+				emdevice.SetNotRunning();
+			});
+		}
+		public void TransferVideoFrameBWDMA()
+		{
+			emdevice.SetRunning();
+			if (lastvideoframe == -1) //Full frame copy, no other way, hope for best
+			{
+				for (int c = 0; c < ZXUtility.MemoryScreenLength; c++)
+				{
+					emdevice.PokeByteDMA((ushort)(ZXUtility.MemoryScreenStart + c), videoframes[0][c]);
+				}
+				lastvideoframe = 0;
+			}
+			else //Copy ONLY bytes that changed
+			{
+				for (int c = 0; c < ZXUtility.MemoryScreenLength; c++)
+				{
+					if (videoframes[lastvideoframe][c] != videoframes[lastvideoframe + 1][c])
+					{
+						emdevice.PokeByteDMA((ushort)(ZXUtility.MemoryScreenStart + c), videoframes[lastvideoframe+1][c]);
+					}
+				}
+				lastvideoframe +=1;
+			}
+			Console.WriteLine($"Last frame sent {lastvideoframe}");
+			emdevice.SetNotRunning();
+		}
 		private void ADDSUBMULDIV()
 		{
 			emdevice.SetRunning();
@@ -81,6 +200,41 @@ namespace EdgeMaster.Core
 				//ADD SUB MUL DIV
 				double addv = (((f1+f2)-f3)*f4)/f5;
 				emdevice.WriteZXFloatToInQueue(addv);
+				emdevice.SetNotRunning();
+			});
+		}
+		private void AHLSBENCH()
+		{
+			emdevice.SetRunning();
+			Task.Run(() =>
+			{
+				//Outer loop count
+				uint olc=emdevice.ReadULongFromOutQueue();
+				//Inner loop count
+				uint ilc = emdevice.ReadULongFromOutQueue();
+
+				double s =0;
+				double r = 0;
+				double a = 0;
+
+				for (int ol = 1; ol <= olc; ol++)
+				{
+					a = ol;
+					for (int il = 1; il <= ilc; il++)
+					{
+						a=Math.Sqrt(a);
+						r = r + emdevice.Rng.NextDouble();
+					}
+					for (int il = 1; il <= ilc; il++)
+					{
+						a = Math.Pow(a, 2);
+						r = r + emdevice.Rng.NextDouble();
+					}
+					s = s + a;
+				}
+				Console.WriteLine($"s : {Math.Abs(1010 - s / 5.0)} - r : {Math.Abs(1000 - r)}");
+				emdevice.WriteZXFloatToInQueue(Math.Abs(1010-s/5.0));
+				emdevice.WriteZXFloatToInQueue(Math.Abs(1000 - r));
 				emdevice.SetNotRunning();
 			});
 		}

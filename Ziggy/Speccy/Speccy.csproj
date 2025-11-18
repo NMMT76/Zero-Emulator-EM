@@ -84,6 +84,7 @@
     <Compile Include="Devices\AY_8192.cs" />
     <Compile Include="Devices\EdgeMasterSupport\EM_InternalLib_RAM.cs" />
     <Compile Include="Devices\EdgeMasterSupport\EM_InternalLib_Math.cs" />
+    <Compile Include="Devices\EdgeMasterSupport\MTRandom.cs" />
     <Compile Include="Devices\EdgeMasterTester.cs" />
     <Compile Include="Devices\EdgeMasterSupport\Camera.cs" />
     <Compile Include="Devices\EdgeMasterSupport\EdgeMasterSupport.cs" />

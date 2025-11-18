@@ -14,6 +14,7 @@ using Speccy.Devices.EdgeMasterSupport;
 using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
 using NAudio.Wave;
+using System.Collections.Generic;
 
 namespace EdgeMaster.Core
 {
@@ -45,6 +46,8 @@ namespace EdgeMaster.Core
 		{
 			cam?.Dispose();
 			camcontrol?.Dispose();
+			videoframes=new List<byte[]>();
+			lastvideoframe = -1;
 		}
 		public void RegisterEM(IEMDevice emdevice)
 		{
@@ -54,6 +57,7 @@ namespace EdgeMaster.Core
 			emdevice.AddAction("GUIDS", GetGUIDS);
 			emdevice.AddAction("RND8S", RND8S);
 			emdevice.AddAction("RND8SB", RND8SB);
+			emdevice.AddAction("RNDFL", RNDFL);
 			#endregion
 			#region MathTag
 			emdevice.AddAction("ADDFL", ADDFL);
@@ -95,6 +99,8 @@ namespace EdgeMaster.Core
 			emdevice.AddAction("IMAGELOADBWDMA", IMAGELOADBWDMA);
 			emdevice.AddAction("PLAYAUDIOSYNC", PlayAudioSync);
 			emdevice.AddAction("PLAYVIDEOFILEBW", PlayVideoFileBW);
+			emdevice.AddAction("LOADVIDEOFILEBW", LoadVideoFileBW);
+			emdevice.AddAction("TRANSFERVIDEOFRAMEBWDMA", TransferVideoFrameBWDMA);
 			#endregion
 			//Benchmarks and tests
 			#region BenchmarkTestTag
@@ -107,6 +113,7 @@ namespace EdgeMaster.Core
 			emdevice.AddAction("MANDELCALC", MandelCalc);
 			emdevice.AddAction("PCWBM3", PCWBM3);
 			emdevice.AddAction("PCWBM4567", PCWBM4567);
+			emdevice.AddAction("AHLSBENCH", AHLSBENCH);
 			#endregion
 		}
 		#region Misc

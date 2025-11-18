@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Speccy.Devices.EdgeMasterSupport;
+using System;
 
 namespace EdgeMaster.Enums
 {
@@ -35,6 +36,7 @@ namespace EdgeMaster.Interfaces
 		byte ReadByteFromOutQueue();
 		byte[] ReadBytesFromOutQueue(int numbytes);
 		uint ReadULongFromOutQueue();
+		ushort ReadUIntegerFromOutQueue();
 		string ReadStringFromOutQueue();
 		double ReadZXFloatFromOutQueue();
 		void WriteByteToInQueue(byte bytevalue);
@@ -62,6 +64,8 @@ namespace EdgeMaster.Interfaces
 		void PokeByteDMA(ushort addr, byte val);
 		byte PeekByteDMA(ushort addr);
 		int GetTStates();
+		double ReadZXFloatFromMemory(ushort addr);
+		void WriteZXFloatToMemory(ushort addr,double val);
 		#endregion
 		#region State
 		//State related methods
@@ -69,5 +73,6 @@ namespace EdgeMaster.Interfaces
 		void SetNotRunning();
 		#endregion
 		Random Rng { get; }
+		MTRandom MTRng { get; }
 	}
 }
